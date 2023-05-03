@@ -5,7 +5,7 @@ enableToc: false
 
 测试一下
 
-[[notes/games/Lecture 02 Review of Linear Algebra]]
+[[notes/games101/Lecture 02 Review of Linear Algebra]]
 
 [[notes/hosting]]
 
