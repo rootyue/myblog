@@ -1,4 +1,7 @@
 ---
+title: "Games101 - Lecture 02 Review of Linear Algebra"
+tags:
+- games101
 date created: 2023-05-03 15:28
 ---
 
