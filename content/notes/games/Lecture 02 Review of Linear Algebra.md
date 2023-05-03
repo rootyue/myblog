@@ -4,8 +4,8 @@ Z:\阿里云盘\技术美术\GAMES课程\GAMES101-现代计算机图形学入门
 
 [3:06](file:///Z:\阿里云盘\技术美术\GAMES课程\GAMES101-现代计算机图形学入门-闫令琪\Lecture_02_Review_of_Linear_Algebra.mp4#t=186.481115)
 
-![[res/Lecture_02_Review_of_Linear_AlgebraPT3M8.401S.webp]]
 
+![](res/Lecture_02_Review_of_Linear_AlgebraPT3M10.079S.webp)
 
 # 图形学依赖的基础科学
 [3:51](file:///Z:\阿里云盘\技术美术\GAMES课程\GAMES101-现代计算机图形学入门-闫令琪\Lecture_02_Review_of_Linear_Algebra.mp4#t=230.53687)
@@ -35,7 +35,7 @@ Z:\阿里云盘\技术美术\GAMES课程\GAMES101-现代计算机图形学入门
 
 
 
-$\textcolor[RGB]{168, 234, 104}{\hat{a}}$  读作 a hat
+$\hat{a}$  读作 a hat
 
 ## 向量求和
 [11:18](<file:///Z:/阿里云盘/技术美术/GAMES课程/GAMES101-现代计算机图形学入门-闫令琪/Lecture_02_Review_of_Linear_Algebra.mp4#t=677.8148>)
@@ -188,7 +188,7 @@ $\textcolor[RGB]{168, 234, 104}{\hat{a}}$  读作 a hat
 [51:24](<file:///Z:/阿里云盘/技术美术/GAMES课程/GAMES101-现代计算机图形学入门-闫令琪/Lecture_02_Review_of_Linear_Algebra.mp4#t=3083.514619>)
 
 
-矩阵也有转置，并且矩阵乘法转置满足  $\textcolor[RGB]{168, 234, 104}{( A B ) ^ { T } = B ^ { T } A ^ { T }}$ 
+矩阵也有转置，并且矩阵乘法转置满足  $( A B ) ^ { T } = B ^ { T } A ^ { T }$ 
 
 ## 单位矩阵和逆矩阵
 [52:13](<file:///Z:/阿里云盘/技术美术/GAMES课程/GAMES101-现代计算机图形学入门-闫令琪/Lecture_02_Review_of_Linear_Algebra.mp4#t=3133.454388>)
