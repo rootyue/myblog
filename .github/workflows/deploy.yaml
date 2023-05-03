@@ -36,4 +36,4 @@ jobs:
           github_token: ${{ secrets.ACCESS_TOKEN }}
           publish_dir: ./public
           publish_branch: master  # deploying branch
-          cname: rootyue.github.io
+          cname: www.knowlnk.tech
