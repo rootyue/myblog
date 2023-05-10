@@ -1,0 +1,277 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=description content="理论部分 1. 请你来尝试回答，在机器利⽤鸢尾花数据集对鸢尾花进⾏分类任务的学习过程中，三要素分别对应什么？  T：对给定的单个鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别）
+E：150个鸢尾花数据样本（萼片长度、萼片宽度、花瓣长度、花瓣宽度）和对应的标签数据（类别）
+P指标：对给定的鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别））的准确度
+ 2. 如何理解“使⽤机器学习解决问题的⽬的是为了获得⼀个复杂函数”这句话？  用计算机解决问题可以看成是用 已知的信息 进行计算最终可以得到 需要的信息，也就是 F(已知信息) = 需要的信息 所以机器学习的过程可以理解为 可以从 经验E 中让学习系统去调整 函数F(已知信息) = 需要的信息 黑箱中的系数，让 P指标 也就是 函数F(已知信息) 结果的准确度更高"><meta property="og:title" content="机器学习基础作业班 第一周"><meta property="og:description" content="理论部分 1. 请你来尝试回答，在机器利⽤鸢尾花数据集对鸢尾花进⾏分类任务的学习过程中，三要素分别对应什么？  T：对给定的单个鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别）
+E：150个鸢尾花数据样本（萼片长度、萼片宽度、花瓣长度、花瓣宽度）和对应的标签数据（类别）
+P指标：对给定的鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别））的准确度
+ 2. 如何理解“使⽤机器学习解决问题的⽬的是为了获得⼀个复杂函数”这句话？  用计算机解决问题可以看成是用 已知的信息 进行计算最终可以得到 需要的信息，也就是 F(已知信息) = 需要的信息 所以机器学习的过程可以理解为 可以从 经验E 中让学习系统去调整 函数F(已知信息) = 需要的信息 黑箱中的系数，让 P指标 也就是 函数F(已知信息) 结果的准确度更高"><meta property="og:type" content="website"><meta property="og:image" content="https://www.knowlnk.tech/icon.png"><meta property="og:url" content="https://www.knowlnk.tech/notes/machine_leaning/begin_home_work/%E4%BD%9C%E4%B8%9A%E8%AE%AD%E7%BB%83%E8%90%A5-%E7%AC%AC%E4%B8%80%E5%91%A8/"><meta property="og:width" content="200"><meta property="og:height" content="200"><meta name=twitter:card content="summary"><meta name=twitter:title content="机器学习基础作业班 第一周"><meta name=twitter:description content="理论部分 1. 请你来尝试回答，在机器利⽤鸢尾花数据集对鸢尾花进⾏分类任务的学习过程中，三要素分别对应什么？  T：对给定的单个鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别）
+E：150个鸢尾花数据样本（萼片长度、萼片宽度、花瓣长度、花瓣宽度）和对应的标签数据（类别）
+P指标：对给定的鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别））的准确度
+ 2. 如何理解“使⽤机器学习解决问题的⽬的是为了获得⼀个复杂函数”这句话？  用计算机解决问题可以看成是用 已知的信息 进行计算最终可以得到 需要的信息，也就是 F(已知信息) = 需要的信息 所以机器学习的过程可以理解为 可以从 经验E 中让学习系统去调整 函数F(已知信息) = 需要的信息 黑箱中的系数，让 P指标 也就是 函数F(已知信息) 结果的准确度更高"><meta name=twitter:image content="https://www.knowlnk.tech/icon.png"><title>机器学习基础作业班 第一周</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel="shortcut icon" type=image/png href=https://www.knowlnk.tech//icon.png><link href=https://www.knowlnk.tech/styles.80333fa2099c0bee674efa435fde378c.min.css rel=stylesheet><link href=https://www.knowlnk.tech/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css rel=stylesheet id=theme-link><script src=https://www.knowlnk.tech/js/darkmode.fb33e48379e1030738da955472e32fad.min.js></script>
+<script src=https://www.knowlnk.tech/js/util.00639692264b21bc3ee219733d38a8be.min.js></script>
+<link rel=preload href=https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css as=style onload='this.onload=null,this.rel="stylesheet"' integrity=sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js integrity=sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx crossorigin=anonymous></script>
+<script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js integrity=sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR crossorigin=anonymous></script>
+<script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js integrity=sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@floating-ui/core@1.2.1></script>
+<script src=https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.2.1></script>
+<script defer src=https://www.knowlnk.tech/js/popover.aa9bc99c7c38d3ae9538f218f1416adb.min.js></script>
+<script defer src=https://www.knowlnk.tech/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js></script>
+<script defer src=https://www.knowlnk.tech/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js></script>
+<script defer src=https://www.knowlnk.tech/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js></script>
+<script>const SEARCH_ENABLED=!1,LATEX_ENABLED=!0,PRODUCTION=!0,BASE_URL="https://www.knowlnk.tech/",fetchData=Promise.all([fetch("https://www.knowlnk.tech/indices/linkIndex.0622efac1dcdaf1d7521594c4c007941.min.json").then(e=>e.json()).then(e=>({index:e.index,links:e.links})),fetch("https://www.knowlnk.tech/indices/contentIndex.a3805e0faabd79938e13cef6a8c430d7.min.json").then(e=>e.json())]).then(([{index:e,links:t},n])=>({index:e,links:t,content:n})),render=()=>{const e=new URL(BASE_URL),t=e.pathname,n=window.location.pathname,s=t==n;addCopyButtons(),addTitleToCodeBlocks(),addCollapsibleCallouts(),initPopover("https://www.knowlnk.tech",!0);const o=document.getElementById("footer");if(o){const e=document.getElementById("graph-container");if(!e)return requestAnimationFrame(render);e.textContent="";const t=s&&!1;drawGraph("https://www.knowlnk.tech",t,[{"/moc":"#4388cc"}],t?{centerForce:1,depth:-1,enableDrag:!0,enableLegend:!1,enableZoom:!0,fontSize:.5,linkDistance:1,opacityScale:3,repelForce:1,scale:1.4}:{centerForce:1,depth:1,enableDrag:!0,enableLegend:!1,enableZoom:!0,fontSize:.6,linkDistance:1,opacityScale:3,repelForce:2,scale:1.2})}var i=document.getElementsByClassName("mermaid");i.length>0&&import("https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs").then(e=>{e.default.init()});function a(n){const e=n.target,t=e.className.split(" "),s=t.includes("broken"),o=t.includes("internal-link");plausible("Link Click",{props:{href:e.href,broken:s,internal:o,graph:!1}})}const r=document.querySelectorAll("a");for(link of r)link.className.includes("root-title")&&link.addEventListener("click",a,{once:!0})},init=(e=document)=>{addCopyButtons(),addTitleToCodeBlocks(),renderMathInElement(e.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],macros:{'’':"'"},throwOnError:!1})}</script><script type=module>
+    import { attachSPARouting } from "https:\/\/www.knowlnk.tech\/js\/router.d6fe6bd821db9ea97f9aeefae814d8e7.min.js"
+    attachSPARouting(init, render)
+  </script><script defer data-domain=www.knowlnk.tech src=https://plausible.io/js/script.js></script>
+<script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}</script></head><body><div id=search-container><div id=search-space><input autocomplete=off id=search-bar name=search type=text aria-label=Search placeholder="Search for something..."><div id=results-container></div></div></div><script src=https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin=anonymous defer></script>
+<script defer src=https://www.knowlnk.tech/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js></script><div class=singlePage><header><h1 id=page-title><a class=root-title href=https://www.knowlnk.tech/>寻剑之路</a></h1><div class=spacer></div><div id=search-icon><p>Search</p><svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg></div><div class=darkmode><input class=toggle id=darkmode-toggle type=checkbox tabindex=-1>
+<label id=toggle-label-light for=darkmode-toggle tabindex=-1><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="dayIcon" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35"><title>Light Mode</title><path d="M6 17.5C6 16.672 5.328 16 4.5 16h-3C.672 16 0 16.672.0 17.5S.672 19 1.5 19h3C5.328 19 6 18.328 6 17.5zM7.5 26c-.414.0-.789.168-1.061.439l-2 2C4.168 28.711 4 29.086 4 29.5 4 30.328 4.671 31 5.5 31c.414.0.789-.168 1.06-.44l2-2C8.832 28.289 9 27.914 9 27.5 9 26.672 8.329 26 7.5 26zm10-20C18.329 6 19 5.328 19 4.5v-3C19 .672 18.329.0 17.5.0S16 .672 16 1.5v3C16 5.328 16.671 6 17.5 6zm10 3c.414.0.789-.168 1.06-.439l2-2C30.832 6.289 31 5.914 31 5.5 31 4.672 30.329 4 29.5 4c-.414.0-.789.168-1.061.44l-2 2C26.168 6.711 26 7.086 26 7.5 26 8.328 26.671 9 27.5 9zM6.439 8.561C6.711 8.832 7.086 9 7.5 9 8.328 9 9 8.328 9 7.5c0-.414-.168-.789-.439-1.061l-2-2C6.289 4.168 5.914 4 5.5 4 4.672 4 4 4.672 4 5.5c0 .414.168.789.439 1.06l2 2.001zM33.5 16h-3c-.828.0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5h3c.828.0 1.5-.672 1.5-1.5S34.328 16 33.5 16zM28.561 26.439C28.289 26.168 27.914 26 27.5 26c-.828.0-1.5.672-1.5 1.5.0.414.168.789.439 1.06l2 2C28.711 30.832 29.086 31 29.5 31c.828.0 1.5-.672 1.5-1.5.0-.414-.168-.789-.439-1.061l-2-2zM17.5 29c-.829.0-1.5.672-1.5 1.5v3c0 .828.671 1.5 1.5 1.5s1.5-.672 1.5-1.5v-3C19 29.672 18.329 29 17.5 29zm0-22C11.71 7 7 11.71 7 17.5S11.71 28 17.5 28 28 23.29 28 17.5 23.29 7 17.5 7zm0 18c-4.136.0-7.5-3.364-7.5-7.5s3.364-7.5 7.5-7.5 7.5 3.364 7.5 7.5S21.636 25 17.5 25z"/></svg></label><label id=toggle-label-dark for=darkmode-toggle tabindex=-1><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="nightIcon" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'"><title>Dark Mode</title><path d="M96.76 66.458c-.853-.852-2.15-1.064-3.23-.534-6.063 2.991-12.858 4.571-19.655 4.571C62.022 70.495 50.88 65.88 42.5 57.5 29.043 44.043 25.658 23.536 34.076 6.47c.532-1.08.318-2.379-.534-3.23-.851-.852-2.15-1.064-3.23-.534-4.918 2.427-9.375 5.619-13.246 9.491-9.447 9.447-14.65 22.008-14.65 35.369.0 13.36 5.203 25.921 14.65 35.368s22.008 14.65 35.368 14.65c13.361.0 25.921-5.203 35.369-14.65 3.872-3.871 7.064-8.328 9.491-13.246C97.826 68.608 97.611 67.309 96.76 66.458z"/></svg></label></div></header><article><h1>机器学习基础作业班 第一周</h1><p class=meta>Last updated
+Unknown
+<a href=https://github.com/rootyue/myblog/tree/hugo/content/notes/machine_leaning/begin_home_work/%e4%bd%9c%e4%b8%9a%e8%ae%ad%e7%bb%83%e8%90%a5%20%e7%ac%ac%e4%b8%80%e5%91%a8.md rel=noopener>Edit Source</a></p><ul class=tags><li><a href=https://www.knowlnk.tech/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a></li></ul><aside class=mainTOC><details><summary>Table of Contents</summary><nav id=TableOfContents><ol><li><a href=#理论部分>理论部分</a><ol><li><a href=#1-请你来尝试回答在机器利鸢尾花数据集对鸢尾花进分类任务的学习过程中三要素分别对应什么>1. 请你来尝试回答，在机器利⽤鸢尾花数据集对鸢尾花进⾏分类任务的学习过程中，三要素分别对应什么？</a></li><li><a href=#2-如何理解使机器学习解决问题的的是为了获得个复杂函数这句话>2. 如何理解“使⽤机器学习解决问题的⽬的是为了获得⼀个复杂函数”这句话？</a></li><li><a href=#3-请分别以写数字识别数据集mnist和鸢尾花数据集iris为例解释以下相关概念样本特征特征取值特征向量特征维数类别与类别标签训练集测试集验证集>3. 请分别以⼿写数字识别数据集（MNIST）和鸢尾花数据集（iris）为例解释以下相关概念：样本、特征、特征取值、特征向量、特征维数；类别与类别标签、训练集、测试集、验证集。</a></li><li><a href=#4-识别或预测给定的写体数字图像的类别是个典型的分类任务除此之外机器学习常的学习任务还包括回归聚类特征降维等请分别举例解释说明>4. &ldquo;识别或预测给定的⼿写体数字图像的类别"是⼀个典型的分类任务，除此之外，机器学习常⻅的学习任务还包括“回归”、“聚类”、“特征降维”等，请分别举例解释说明。</a></li><li><a href=#5-举例解释监督学习监督学习监督学习和强化学习分别是怎样的学习范式>5. 举例解释监督学习、⽆监督学习（⾮监督学习）和强化学习分别是怎样的学习范式。</a></li><li><a href=#6-让机器进学习前需要先确定三件事-1-选择个具有未知参数的模型2-定义损失函数3-确定优化法之后便根据优化法开始训练模型直达到预期标准后将训练好的模型进保存就可以它对未知数据进预测了这个过程具体是怎样的请举例详尽说明>6. 让机器进⾏学习前需要先确定三件事： 1. 选择⼀个具有未知参数的模型；2. 定义损失函数；3. 确定优化⽅法。之后便根据优化⽅法开始训练模型，直⾄达到预期标准后，将训练好的模型进⾏保存，就可以⽤它对未知数据进⾏预测了。这个过程具体是怎样的？请举例详尽说明。</a></li><li><a href=#7-经常拟合和过拟合来对模型性能进评价请举例解释这两个概念>7. 经常⽤“⽋拟合”和“过拟合”来对模型性能进⾏评价，请举例解释这两个概念。</a></li><li><a href=#8-请举例说明如何基于交叉验证进模型的选择与评价>8. 请举例说明如何基于交叉验证进⾏模型的选择与评价？</a></li></ol></li><li><a href=#编程部分>编程部分</a><ol><li><a href=#1-numpy---pandas---matplotlib-分别通常来解决什么样的问题>1. NumPy 、 Pandas 、 Matplotlib 分别通常⽤来解决什么样的问题。</a></li><li><a href=#2-numpy-和--pandas-中的数据类型是什么>2. NumPy 和 Pandas 中的数据类型是什么。</a></li><li><a href=#3-numpy-的--ndarray-和--python-中的原数组之间有什么区别>3. NumPy 的 ndarray 和 Python 中的原⽣数组之间有什么区别？</a></li><li><a href=#4-numpy-的多维数组创建式分别是如何使的>4. NumPy 的多维数组创建⽅式分别是如何使⽤的。</a></li><li><a href=#5-已知有数据----a--nparange25reshape5-5>5. 已知有数据： a = np.arange(25).reshape(5, 5)</a></li><li><a href=#6-使--numpy-创建个--55-的矩阵每数值都是从--0-4>6. 使⽤ Numpy 创建⼀个 5*5 的矩阵，每⾏数值都是从 0-4</a></li><li><a href=#7-从维数组--a_2d--nparray333444555-中的每减去维数组--b_1d--nparray123-中相应的值>7. 从⼆维数组 a_2d = np.array([[3,3,3],[4,4,4],[5,5,5]]) 中的每⾏减去⼀维数组 b_1d = np.array([1,2,3]) 中相应的值？</a></li><li><a href=#8-创建个形状为64的--numpy-随机数组该数组创建个列名为a-b-c-d的--dataframe->8. 创建⼀个形状为（6，4）的 NumPy 随机数组，⽤该数组创建⼀个列名为[&lsquo;A&rsquo;, &lsquo;B&rsquo;, &lsquo;C&rsquo;, &lsquo;D&rsquo;]的 DataFrame 。</a></li><li><a href=#9-已知有个python字典存储了3位同学的4课成绩课程分别是c-java-python-js请创建dataframe来-显示成绩单字典如下>9. 已知有⼀个Python字典存储了3位同学的4⻔课成绩，课程分别是&rsquo;C, Java, Python, JS&rsquo;,请创建DataFrame来 显示成绩单。字典如下：</a></li><li><a href=#10-根据--babynames-数据集解决以下问题>10. 根据 babynames 数据集，解决以下问题：</a></li><li><a href=#11-根据--drinks-数据集解决以下问题>11. 根据 drinks 数据集，解决以下问题：</a></li></ol></li></ol></nav></details></aside><a href=#理论部分><h2 id=理论部分><span class=hanchor arialabel=Anchor># </span>理论部分</h2></a><a href=#1-请你来尝试回答在机器利鸢尾花数据集对鸢尾花进分类任务的学习过程中三要素分别对应什么><h3 id=1-请你来尝试回答在机器利鸢尾花数据集对鸢尾花进分类任务的学习过程中三要素分别对应什么><span class=hanchor arialabel=Anchor># </span>1. 请你来尝试回答，在机器利⽤鸢尾花数据集对鸢尾花进⾏分类任务的学习过程中，三要素分别对应什么？</h3></a><blockquote><p>T：对给定的单个鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别）</p><p>E：150个鸢尾花数据样本（萼片长度、萼片宽度、花瓣长度、花瓣宽度）和对应的标签数据（类别）</p><p>P指标：对给定的鸢尾花数据（萼片长度、萼片宽度、花瓣长度、花瓣宽度）预测对应的标签值（类别））的准确度</p></blockquote><a href=#2-如何理解使机器学习解决问题的的是为了获得个复杂函数这句话><h3 id=2-如何理解使机器学习解决问题的的是为了获得个复杂函数这句话><span class=hanchor arialabel=Anchor># </span>2. 如何理解“使⽤机器学习解决问题的⽬的是为了获得⼀个复杂函数”这句话？</h3></a><blockquote><p>用计算机解决问题可以看成是用 已知的信息 进行计算最终可以得到 需要的信息，也就是 F(已知信息) = 需要的信息
+所以机器学习的过程可以理解为 可以从 经验E 中让学习系统去调整 函数F(已知信息) = 需要的信息 黑箱中的系数，让 P指标 也就是 函数F(已知信息) 结果的准确度更高</p></blockquote><a href=#3-请分别以写数字识别数据集mnist和鸢尾花数据集iris为例解释以下相关概念样本特征特征取值特征向量特征维数类别与类别标签训练集测试集验证集><h3 id=3-请分别以写数字识别数据集mnist和鸢尾花数据集iris为例解释以下相关概念样本特征特征取值特征向量特征维数类别与类别标签训练集测试集验证集><span class=hanchor arialabel=Anchor># </span>3. 请分别以⼿写数字识别数据集（MNIST）和鸢尾花数据集（iris）为例解释以下相关概念：样本、特征、特征取值、特征向量、特征维数；类别与类别标签、训练集、测试集、验证集。</h3></a><a href=#4-识别或预测给定的写体数字图像的类别是个典型的分类任务除此之外机器学习常的学习任务还包括回归聚类特征降维等请分别举例解释说明><h3 id=4-识别或预测给定的写体数字图像的类别是个典型的分类任务除此之外机器学习常的学习任务还包括回归聚类特征降维等请分别举例解释说明><span class=hanchor arialabel=Anchor># </span>4. &ldquo;识别或预测给定的⼿写体数字图像的类别"是⼀个典型的分类任务，除此之外，机器学习常⻅的学习任务还包括“回归”、“聚类”、“特征降维”等，请分别举例解释说明。</h3></a><a href=#5-举例解释监督学习监督学习监督学习和强化学习分别是怎样的学习范式><h3 id=5-举例解释监督学习监督学习监督学习和强化学习分别是怎样的学习范式><span class=hanchor arialabel=Anchor># </span>5. 举例解释监督学习、⽆监督学习（⾮监督学习）和强化学习分别是怎样的学习范式。</h3></a><a href=#6-让机器进学习前需要先确定三件事-1-选择个具有未知参数的模型2-定义损失函数3-确定优化法之后便根据优化法开始训练模型直达到预期标准后将训练好的模型进保存就可以它对未知数据进预测了这个过程具体是怎样的请举例详尽说明><h3 id=6-让机器进学习前需要先确定三件事-1-选择个具有未知参数的模型2-定义损失函数3-确定优化法之后便根据优化法开始训练模型直达到预期标准后将训练好的模型进保存就可以它对未知数据进预测了这个过程具体是怎样的请举例详尽说明><span class=hanchor arialabel=Anchor># </span>6. 让机器进⾏学习前需要先确定三件事： 1. 选择⼀个具有未知参数的模型；2. 定义损失函数；3. 确定优化⽅法。之后便根据优化⽅法开始训练模型，直⾄达到预期标准后，将训练好的模型进⾏保存，就可以⽤它对未知数据进⾏预测了。这个过程具体是怎样的？请举例详尽说明。</h3></a><a href=#7-经常拟合和过拟合来对模型性能进评价请举例解释这两个概念><h3 id=7-经常拟合和过拟合来对模型性能进评价请举例解释这两个概念><span class=hanchor arialabel=Anchor># </span>7. 经常⽤“⽋拟合”和“过拟合”来对模型性能进⾏评价，请举例解释这两个概念。</h3></a><a href=#8-请举例说明如何基于交叉验证进模型的选择与评价><h3 id=8-请举例说明如何基于交叉验证进模型的选择与评价><span class=hanchor arialabel=Anchor># </span>8. 请举例说明如何基于交叉验证进⾏模型的选择与评价？</h3></a><a href=#编程部分><h2 id=编程部分><span class=hanchor arialabel=Anchor># </span>编程部分</h2></a><a href=#1-numpy---pandas---matplotlib-分别通常来解决什么样的问题><h3 id=1-numpy---pandas---matplotlib-分别通常来解决什么样的问题><span class=hanchor arialabel=Anchor># </span>1. NumPy 、 Pandas 、 Matplotlib 分别通常⽤来解决什么样的问题。</h3></a><blockquote><p>Numpy 是用来解决矩阵运算的，Pandas很像表格数据，可以用来进行查询，而Matplotlib可以进行图表的绘制</p></blockquote><a href=#2-numpy-和--pandas-中的数据类型是什么><h3 id=2-numpy-和--pandas-中的数据类型是什么><span class=hanchor arialabel=Anchor># </span>2. NumPy 和 Pandas 中的数据类型是什么。</h3></a><blockquote><p>Numpy中的数据类型是 NDArray，而Pandas中的数据是DataFrame 还有 Series（DataFrame可以看成是多个Series组成的字典）</p></blockquote><a href=#3-numpy-的--ndarray-和--python-中的原数组之间有什么区别><h3 id=3-numpy-的--ndarray-和--python-中的原数组之间有什么区别><span class=hanchor arialabel=Anchor># </span>3. NumPy 的 ndarray 和 Python 中的原⽣数组之间有什么区别？</h3></a><blockquote><p>ndarray 底层运算是在GPU中运行的，而原生数组是在cpu中运行。同时ndarray支持的切片操作有很多种，而Python中的原生数组只支持下标切片。而且ndarray还支持广播操作还有一个常用的函数操作。</p></blockquote><a href=#4-numpy-的多维数组创建式分别是如何使的><h3 id=4-numpy-的多维数组创建式分别是如何使的><span class=hanchor arialabel=Anchor># </span>4. NumPy 的多维数组创建⽅式分别是如何使⽤的。</h3></a><a href=#nparray><h4 id=nparray><span class=hanchor arialabel=Anchor># </span>np.array()</h4></a><blockquote><p>np.array() 在使用时值需要传入一个序列型的数据，就可以得到对应的ndarray序列</p></blockquote><a href=#npones--npzeros-和-npempty><h4 id=npones--npzeros-和-npempty><span class=hanchor arialabel=Anchor># </span>np.ones() ， np.zeros() 和 np.empty()</h4></a><blockquote><p>使用方法是一样的：1.传入一个数字代表着一维数据的元素个数。2. 传入 [x1,x2,&mldr;,xn]序列数据可以指定每一维数据的数量进行创建。
+不同之处在于ones创建的ndarray中每一个元素值都是1，zeros创建的都是0，而empty创建的元素值是没有初始化的</p></blockquote><a href=#nparange><h4 id=nparange><span class=hanchor arialabel=Anchor># </span>np.arange()</h4></a><blockquote><p>np.arange可以指定开始值，结束值以及步长得到一个一维的ndarray序列</p></blockquote><a href=#npones_like-和-npzeros_like><h4 id=npones_like-和-npzeros_like><span class=hanchor arialabel=Anchor># </span>np.ones_like() 和 np.zeros_like()</h4></a><blockquote><p>都可以传入一个原生多维数组或者ndarray生成一个对应维度的ndarray，不过ndarray中的每一个元素都会分别变成1（前者）,0（后者）</p></blockquote><a href=#nprandomrandom><h4 id=nprandomrandom><span class=hanchor arialabel=Anchor># </span>np.random.random()</h4></a><blockquote><p>可以传入size表示需要生成的ndarray数组的维度，数组中的每一个元素的数值为0到1之间的随机小数</p></blockquote><a href=#5-已知有数据----a--nparange25reshape5-5><h3 id=5-已知有数据----a--nparange25reshape5-5><span class=hanchor arialabel=Anchor># </span>5. 已知有数据： a = np.arange(25).reshape(5, 5)</h3></a><p>问题1：交换2⾏和3⾏，交换4列和5列</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>a</span><span class=p><a class="internal-link broken">span><span class=p></a></span> <span class=o>=</span> <span class=n>a</span><span class=p><a class="internal-link broken">span><span class=p></a></span> <span class=n>和</span> <span class=n>a</span><span class=p>[:,[</span><span class=mi>3</span><span class=p>,</span><span class=mi>4</span><span class=p>]]</span> <span class=o>=</span> <span class=n>a</span><span class=p>[:,</span> <span class=p>[</span><span class=mi>4</span><span class=p>,</span><span class=mi>3</span><span class=p>]]</span>
+</span></span></code></pre></td></tr></table></div></div><p>问题2：将所有奇数替换为-1</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>a</span><span class=p>[</span><span class=n>c</span> <span class=o>%</span> <span class=mi>2</span> <span class=o>==</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p>问题3：将对⻆线上的值替换为0</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>idx</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>diag_indices</span><span class=p>(</span><span class=mi>5</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>a</span><span class=p>[</span><span class=n>idx</span><span class=p>]</span><span class=o>=</span><span class=mi>0</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#6-使--numpy-创建个--55-的矩阵每数值都是从--0-4><h3 id=6-使--numpy-创建个--55-的矩阵每数值都是从--0-4><span class=hanchor arialabel=Anchor># </span>6. 使⽤ Numpy 创建⼀个 5*5 的矩阵，每⾏数值都是从 0-4</h3></a><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span><span class=mi>5</span><span class=p>)</span> <span class=o>*</span> <span class=n>np</span><span class=o>.</span><span class=n>ones</span><span class=p>([</span><span class=mi>5</span><span class=p>,</span><span class=mi>5</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#7-从维数组--a_2d--nparray333444555-中的每减去维数组--b_1d--nparray123-中相应的值><h3 id=7-从维数组--a_2d--nparray333444555-中的每减去维数组--b_1d--nparray123-中相应的值><span class=hanchor arialabel=Anchor># </span>7. 从⼆维数组 a_2d = np.array([[3,3,3],[4,4,4],[5,5,5]]) 中的每⾏减去⼀维数组 b_1d = np.array([1,2,3]) 中相应的值？</h3></a><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>a_2d</span> <span class=o>-</span> <span class=n>b_1d</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#8-创建个形状为64的--numpy-随机数组该数组创建个列名为a-b-c-d的--dataframe-><h3 id=8-创建个形状为64的--numpy-随机数组该数组创建个列名为a-b-c-d的--dataframe-><span class=hanchor arialabel=Anchor># </span>8. 创建⼀个形状为（6，4）的 NumPy 随机数组，⽤该数组创建⼀个列名为[&lsquo;A&rsquo;, &lsquo;B&rsquo;, &lsquo;C&rsquo;, &lsquo;D&rsquo;]的 DataFrame 。</h3></a><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>random</span><span class=p>([</span><span class=mi>6</span><span class=p>,</span><span class=mi>4</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>df</span> <span class=o>=</span> <span class=n>pd</span><span class=o>.</span><span class=n>DataFrame</span><span class=p>(</span><span class=n>r</span><span class=p>,</span> <span class=n>dolumns</span><span class=o>=</span><span class=p>[</span><span class=s1>&#39;A&#39;</span><span class=p>,</span> <span class=s1>&#39;B&#39;</span><span class=p>,</span> <span class=s1>&#39;C&#39;</span><span class=p>,</span> <span class=s1>&#39;D&#39;</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#9-已知有个python字典存储了3位同学的4课成绩课程分别是c-java-python-js请创建dataframe来-显示成绩单字典如下><h3 id=9-已知有个python字典存储了3位同学的4课成绩课程分别是c-java-python-js请创建dataframe来-显示成绩单字典如下><span class=hanchor arialabel=Anchor># </span>9. 已知有⼀个Python字典存储了3位同学的4⻔课成绩，课程分别是&rsquo;C, Java, Python, JS&rsquo;,请创建DataFrame来 显示成绩单。字典如下：</h3></a><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>d</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=s1>&#39;LiYongzhu&#39;</span> <span class=p>:</span> <span class=p>[</span><span class=mi>95</span><span class=p>,</span> <span class=mi>96</span><span class=p>,</span> <span class=mi>90</span><span class=p>,</span> <span class=mi>88</span><span class=p>],</span> <span class=s1>&#39;LiuQingyuan&#39;</span> <span class=p>:</span> <span class=p>[</span><span class=mi>90</span><span class=p>,</span> <span class=mi>93</span><span class=p>,</span> <span class=mi>95</span><span class=p>,</span> <span class=mi>90</span><span class=p>],</span> <span class=s1>&#39;GuoYimeng&#39;</span> <span class=p>:</span> <span class=p>[</span><span class=mi>100</span><span class=p>,</span> <span class=mi>100</span><span class=p>,</span> <span class=mi>100</span><span class=p>,</span> <span class=mi>100</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>df</span> <span class=o>=</span> <span class=n>pd</span><span class=o>.</span><span class=n>DataFrame</span><span class=p>(</span><span class=n>d</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#10-根据--babynames-数据集解决以下问题><h3 id=10-根据--babynames-数据集解决以下问题><span class=hanchor arialabel=Anchor># </span>10. 根据 babynames 数据集，解决以下问题：</h3></a><p>A. 分别统计男⽣和⼥⽣的出⽣⼈数</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 设置数据集所在目录和文件名前缀</span>
+</span></span><span class=line><span class=cl><span class=n>data_dir</span> <span class=o>=</span> <span class=s2>&#34;dataset/names&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>prefix</span> <span class=o>=</span> <span class=s2>&#34;yob&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 存储男生和女生的数量</span>
+</span></span><span class=line><span class=cl><span class=n>male_count</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=n>female_count</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 遍历目录中所有符合条件的文件</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>filename</span> <span class=ow>in</span> <span class=n>os</span><span class=o>.</span><span class=n>listdir</span><span class=p>(</span><span class=n>data_dir</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>filename</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span><span class=n>prefix</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 打开文件并逐行读取数据</span>
+</span></span><span class=line><span class=cl>        <span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=n>data_dir</span><span class=p>,</span> <span class=n>filename</span><span class=p>),</span> <span class=s2>&#34;r&#34;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>data</span> <span class=o>=</span> <span class=n>f</span><span class=o>.</span><span class=n>readlines</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>line</span> <span class=ow>in</span> <span class=n>data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 解析每一行数据，获取性别和出生人数</span>
+</span></span><span class=line><span class=cl>                <span class=n>name</span><span class=p>,</span> <span class=n>gender</span><span class=p>,</span> <span class=n>count</span> <span class=o>=</span> <span class=n>line</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s2>&#34;,&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=n>gender</span> <span class=o>==</span> <span class=s2>&#34;M&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=n>male_count</span> <span class=o>+=</span> <span class=nb>int</span><span class=p>(</span><span class=n>count</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=k>elif</span> <span class=n>gender</span> <span class=o>==</span> <span class=s2>&#34;F&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=n>female_count</span> <span class=o>+=</span> <span class=nb>int</span><span class=p>(</span><span class=n>count</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 输出男生和女生的数量</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;Male count:&#34;</span><span class=p>,</span> <span class=n>male_count</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;Female count:&#34;</span><span class=p>,</span> <span class=n>female_count</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>B. 有多少个不重复的名字</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 设置数据集所在目录和文件名前缀</span>
+</span></span><span class=line><span class=cl><span class=n>data_dir</span> <span class=o>=</span> <span class=s2>&#34;dataset/names&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>prefix</span> <span class=o>=</span> <span class=s2>&#34;yob&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 存储所有不重复的名字</span>
+</span></span><span class=line><span class=cl><span class=n>unique_names</span> <span class=o>=</span> <span class=nb>set</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 遍历目录中所有符合条件的文件</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>filename</span> <span class=ow>in</span> <span class=n>os</span><span class=o>.</span><span class=n>listdir</span><span class=p>(</span><span class=n>data_dir</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>filename</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span><span class=n>prefix</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 打开文件并逐行读取数据</span>
+</span></span><span class=line><span class=cl>        <span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=n>data_dir</span><span class=p>,</span> <span class=n>filename</span><span class=p>),</span> <span class=s2>&#34;r&#34;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>data</span> <span class=o>=</span> <span class=n>f</span><span class=o>.</span><span class=n>readlines</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>line</span> <span class=ow>in</span> <span class=n>data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 解析每一行数据，获取姓名并添加到集合中</span>
+</span></span><span class=line><span class=cl>                <span class=n>name</span><span class=p>,</span> <span class=n>_</span><span class=p>,</span> <span class=n>_</span> <span class=o>=</span> <span class=n>line</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s2>&#34;,&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>unique_names</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 输出不重复的名字数量</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;Number of unique names:&#34;</span><span class=p>,</span> <span class=nb>len</span><span class=p>(</span><span class=n>unique_names</span><span class=p>))</span>
+</span></span></code></pre></td></tr></table></div></div><p>C. 横坐标为年份，纵坐标为数量，男⼥不同的⾛势图</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>matplotlib.pyplot</span> <span class=k>as</span> <span class=nn>plt</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 设置数据集所在目录和文件名前缀</span>
+</span></span><span class=line><span class=cl><span class=n>data_dir</span> <span class=o>=</span> <span class=s2>&#34;dataset/names&#34;</span>
+</span></span><span class=line><span class=cl><span class=n>prefix</span> <span class=o>=</span> <span class=s2>&#34;yob&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 存储男生和女生每年的出生人数</span>
+</span></span><span class=line><span class=cl><span class=n>male_counts</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=n>female_counts</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 遍历目录中所有符合条件的文件</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>filename</span> <span class=ow>in</span> <span class=n>os</span><span class=o>.</span><span class=n>listdir</span><span class=p>(</span><span class=n>data_dir</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>filename</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span><span class=n>prefix</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 解析文件名，获取年份</span>
+</span></span><span class=line><span class=cl>        <span class=n>year</span> <span class=o>=</span> <span class=nb>int</span><span class=p>(</span><span class=n>filename</span><span class=p>[</span><span class=mi>3</span><span class=p>:</span><span class=o>-</span><span class=mi>4</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># 打开文件并逐行读取数据</span>
+</span></span><span class=line><span class=cl>        <span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=n>os</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=n>data_dir</span><span class=p>,</span> <span class=n>filename</span><span class=p>),</span> <span class=s2>&#34;r&#34;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>data</span> <span class=o>=</span> <span class=n>f</span><span class=o>.</span><span class=n>readlines</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>line</span> <span class=ow>in</span> <span class=n>data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 解析每一行数据，获取性别和出生人数</span>
+</span></span><span class=line><span class=cl>                <span class=n>name</span><span class=p>,</span> <span class=n>gender</span><span class=p>,</span> <span class=n>count</span> <span class=o>=</span> <span class=n>line</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s2>&#34;,&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=n>gender</span> <span class=o>==</span> <span class=s2>&#34;M&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=k>if</span> <span class=n>year</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>male_counts</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                        <span class=n>male_counts</span><span class=p>[</span><span class=n>year</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>                    <span class=n>male_counts</span><span class=p>[</span><span class=n>year</span><span class=p>]</span> <span class=o>+=</span> <span class=nb>int</span><span class=p>(</span><span class=n>count</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=k>if</span> <span class=n>year</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>female_counts</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                        <span class=n>female_counts</span><span class=p>[</span><span class=n>year</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>                    <span class=n>female_counts</span><span class=p>[</span><span class=n>year</span><span class=p>]</span> <span class=o>+=</span> <span class=nb>int</span><span class=p>(</span><span class=n>count</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 整理数据，生成绘图所需的 X 和 Y 坐标</span>
+</span></span><span class=line><span class=cl><span class=n>x</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>male_counts</span><span class=o>.</span><span class=n>keys</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=n>y_male</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>male_counts</span><span class=o>.</span><span class=n>values</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=n>y_female</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>female_counts</span><span class=o>.</span><span class=n>values</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 绘制男女数量走势图</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>plot</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y_male</span><span class=p>,</span> <span class=n>label</span><span class=o>=</span><span class=s2>&#34;Male&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>plot</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y_female</span><span class=p>,</span> <span class=n>label</span><span class=o>=</span><span class=s2>&#34;Female&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>xlabel</span><span class=p>(</span><span class=s2>&#34;Year&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>ylabel</span><span class=p>(</span><span class=s2>&#34;Count&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>title</span><span class=p>(</span><span class=s2>&#34;Number of Births by Gender and Year&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>legend</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>show</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#11-根据--drinks-数据集解决以下问题><h3 id=11-根据--drinks-数据集解决以下问题><span class=hanchor arialabel=Anchor># </span>11. 根据 drinks 数据集，解决以下问题：</h3></a><p>A. 哪个国家的饮酒量最⼤</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>pandas</span> <span class=k>as</span> <span class=nn>pd</span>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl><span class=c1># 读取数据集  </span>
+</span></span><span class=line><span class=cl><span class=n>drinks</span> <span class=o>=</span> <span class=n>pd</span><span class=o>.</span><span class=n>read_csv</span><span class=p>(</span><span class=s1>&#39;dataset/drinks.csv&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>rank</span> <span class=o>=</span> <span class=n>drinks</span><span class=o>.</span><span class=n>groupby</span><span class=p>(</span><span class=s1>&#39;country&#39;</span><span class=p>)[</span><span class=s1>&#39;total_litres_of_pure_alcohol&#39;</span><span class=p>]</span><span class=o>.</span><span class=n>sum</span><span class=p>()</span><span class=o>.</span><span class=n>sort_values</span><span class=p>(</span><span class=n>ascending</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;饮酒量最⼤的国家是：&#34;</span><span class=p>,</span> <span class=n>rank</span><span class=o>.</span><span class=n>index</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><p>B. 哪个⼤洲的饮酒量最⼤</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>pandas</span> <span class=k>as</span> <span class=nn>pd</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 读取数据集</span>
+</span></span><span class=line><span class=cl><span class=n>drinks</span> <span class=o>=</span> <span class=n>pd</span><span class=o>.</span><span class=n>read_csv</span><span class=p>(</span><span class=s2>&#34;dataset/drinks.csv&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 按照大陆对总消耗量进行分组求和，并排序</span>
+</span></span><span class=line><span class=cl><span class=n>continent_drinks</span> <span class=o>=</span> <span class=n>drinks</span><span class=o>.</span><span class=n>groupby</span><span class=p>(</span><span class=s1>&#39;continent&#39;</span><span class=p>)[</span><span class=s1>&#39;total_litres_of_pure_alcohol&#39;</span><span class=p>]</span><span class=o>.</span><span class=n>sum</span><span class=p>()</span><span class=o>.</span><span class=n>sort_values</span><span class=p>(</span><span class=n>ascending</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 输出饮酒量最大的大洲</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;饮酒量最大的大洲是：&#34;</span><span class=p>,</span> <span class=n>continent_drinks</span><span class=o>.</span><span class=n>index</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div></article><hr><div class=page-end id=footer><div class=backlinks-container><h3>Backlinks</h3><ul class=backlinks><li>No backlinks found</li></ul></div><div><script src=https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI=" crossorigin=anonymous></script><h3>Interactive Graph</h3><div id=graph-container></div><style>:root{--g-node:var(--secondary);--g-node-active:var(--primary);--g-node-inactive:var(--visited);--g-link:var(--outlinegray);--g-link-active:#5a7282}</style><script src=https://www.knowlnk.tech/js/graph.6579af7b10c818dbd2ca038702db0224.js></script></div></div><div id=contact_buttons><footer><p>Made by Wu Chenyue using <a href=https://github.com/jackyzha0/quartz>Quartz</a>, © 2023</p><ul><li><a href=https://www.knowlnk.tech/>Home</a></li><li><a href=https://github.com/rootyue>GitHub</a></li></ul></footer></div></div></body></html>
