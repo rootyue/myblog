@@ -5,6 +5,8 @@ enableToc: false
 
 测试一下
 
+[作业训练营 第一周](notes/machine_leaning/begin_home_work/作业训练营%20第一周.md)
+
 [[notes/games101/Lecture 02 Review of Linear Algebra]]
 
 [[notes/hosting]]
