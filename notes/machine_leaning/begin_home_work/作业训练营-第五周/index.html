@@ -1,0 +1,404 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=description content="我们已经学过卷积神经⽹络以及对应的⼀些经典模型，这次课开始进⼊时序信息处理的模型。其实这两种技术对应了深度学习⾥⾯两个主流领域，计算机视觉(cv)和⾃然语⾔处理(NLP)。
+先来思考⼀个问题，为什么经常使⽤卷积神经⽹络来处理图像问题，⽤时序模型来处理⾃然语⾔问题？因为在图像处理过程中，图像空间信息很重要。⼀个像素点和它上下左右周围⼀圈包围的像素点关系密切，⽽全连接神经
+⽹络在将图像数据展开的同时会丢掉这些信息，所以卷积核的作⽤就能将⼀个⼩空间范围内的信息⼀起处理，这就很合理了。
+然⽽⾃然语⾔⾥⾯的问题更多依赖的是上下⽂（当前⽂字的前⾯和后⾯的若⼲⻓度的⽂字）关系，⽽不是空间关系，就像你做完形填空，你不会着重关注这个空对应的上⼀⾏这个位置的词和下⼀⾏这个位置的词⼀样。
+所以我们现在关注的是前后若⼲个时间单位的信息对当前信息的影响，这就是时间序列模型的由来。这次内容我们会学习到经典的简单RNN 和 LSTM 。
+可以把时序模型常解决的问题根据输⼊和输出的序列⻓度分为有这样⼏种情况：&#34;1-N&#34;、&#34;N-1&#34;、&#34;N-N&#34;(输⼊输出都为多个但是等⻓)、&#34;N-M&#34;（输⼊输出都为多个但不等⻓）。
+①这可以具体对应哪些问题？分别举例说明。  &ldquo;1-N&#34;情况：这种情况下，输入序列长度为1，输出序列长度为N。典型的实际应用如：  输入某个时间点的数据，例如股票价格、天气信息等，预测接下来几个时间点的数据。例如，输入今天的股票价格，预测接下来3天的股票价格。   &ldquo;N-1&#34;情况：这种情况下，输入序列长度为N，输出序列长度为1。典型的实际应用如：  在自然语言处理中，可将一段文本输入模型，输出为该文本的情感分类（如正面、负面）。此时，输入为一段文本（N个词），输出为一个类别。 在时间序列预测中，输入历史数据，预测下一个时间点的值。例如，输入过去一个月的销量数据，预测明天的销量。   &ldquo;N-N&#34;情况：这种情况下，输入序列长度为N，输出序列长度也为N。典型的实际应用如：  机器翻译：将一段源语言文本翻译成目标语言文本。输入为一段源语言文本（N个词），输出为目标语言文本（N个词，源序列与目标序列一一对应）。 序列标注任务：输入一段文本，为每个词分配一个标签。例如，命名实体识别（将人名、地名等标注出来）。输入序列为文本（N个词），输出序列为标签（N个标签，与输入文本一一对应）。   &ldquo;N-M&#34;情况：这种情况下，输入序列长度为N，输出序列长度为M（N和M可以不等长）。典型的实际应用如：  文本摘要任务：根据输入的一段较长的文本，输出一段较短的摘要。此时，输入为一段长文本（N个词），输出为一段摘要（M个词，M小于N）。例如，根据新闻报道生成简短的新闻标题。 对话系统：输入为用户的多个对话轮次（N轮），输出为机器人的多个回复（M轮）。例如，在输入用户提问的过程中，机器人可能会在中间插入一些引导性的问题或补充提醒，从而使得输入和输出序列长度不同。    假如我们现在要从这句话&#34;你知道中国有个教AI的⽼师叫陶卓吗&#34;中识别出⼈名，"><meta property="og:title" content="机器学习基础作业班 第五周"><meta property="og:description" content="我们已经学过卷积神经⽹络以及对应的⼀些经典模型，这次课开始进⼊时序信息处理的模型。其实这两种技术对应了深度学习⾥⾯两个主流领域，计算机视觉(cv)和⾃然语⾔处理(NLP)。
+先来思考⼀个问题，为什么经常使⽤卷积神经⽹络来处理图像问题，⽤时序模型来处理⾃然语⾔问题？因为在图像处理过程中，图像空间信息很重要。⼀个像素点和它上下左右周围⼀圈包围的像素点关系密切，⽽全连接神经
+⽹络在将图像数据展开的同时会丢掉这些信息，所以卷积核的作⽤就能将⼀个⼩空间范围内的信息⼀起处理，这就很合理了。
+然⽽⾃然语⾔⾥⾯的问题更多依赖的是上下⽂（当前⽂字的前⾯和后⾯的若⼲⻓度的⽂字）关系，⽽不是空间关系，就像你做完形填空，你不会着重关注这个空对应的上⼀⾏这个位置的词和下⼀⾏这个位置的词⼀样。
+所以我们现在关注的是前后若⼲个时间单位的信息对当前信息的影响，这就是时间序列模型的由来。这次内容我们会学习到经典的简单RNN 和 LSTM 。
+可以把时序模型常解决的问题根据输⼊和输出的序列⻓度分为有这样⼏种情况：&#34;1-N&#34;、&#34;N-1&#34;、&#34;N-N&#34;(输⼊输出都为多个但是等⻓)、&#34;N-M&#34;（输⼊输出都为多个但不等⻓）。
+①这可以具体对应哪些问题？分别举例说明。  &ldquo;1-N&#34;情况：这种情况下，输入序列长度为1，输出序列长度为N。典型的实际应用如：  输入某个时间点的数据，例如股票价格、天气信息等，预测接下来几个时间点的数据。例如，输入今天的股票价格，预测接下来3天的股票价格。   &ldquo;N-1&#34;情况：这种情况下，输入序列长度为N，输出序列长度为1。典型的实际应用如：  在自然语言处理中，可将一段文本输入模型，输出为该文本的情感分类（如正面、负面）。此时，输入为一段文本（N个词），输出为一个类别。 在时间序列预测中，输入历史数据，预测下一个时间点的值。例如，输入过去一个月的销量数据，预测明天的销量。   &ldquo;N-N&#34;情况：这种情况下，输入序列长度为N，输出序列长度也为N。典型的实际应用如：  机器翻译：将一段源语言文本翻译成目标语言文本。输入为一段源语言文本（N个词），输出为目标语言文本（N个词，源序列与目标序列一一对应）。 序列标注任务：输入一段文本，为每个词分配一个标签。例如，命名实体识别（将人名、地名等标注出来）。输入序列为文本（N个词），输出序列为标签（N个标签，与输入文本一一对应）。   &ldquo;N-M&#34;情况：这种情况下，输入序列长度为N，输出序列长度为M（N和M可以不等长）。典型的实际应用如：  文本摘要任务：根据输入的一段较长的文本，输出一段较短的摘要。此时，输入为一段长文本（N个词），输出为一段摘要（M个词，M小于N）。例如，根据新闻报道生成简短的新闻标题。 对话系统：输入为用户的多个对话轮次（N轮），输出为机器人的多个回复（M轮）。例如，在输入用户提问的过程中，机器人可能会在中间插入一些引导性的问题或补充提醒，从而使得输入和输出序列长度不同。    假如我们现在要从这句话&#34;你知道中国有个教AI的⽼师叫陶卓吗&#34;中识别出⼈名，"><meta property="og:type" content="website"><meta property="og:image" content="https://www.knowlnk.tech/icon.png"><meta property="og:url" content="https://www.knowlnk.tech/notes/machine_leaning/begin_home_work/%E4%BD%9C%E4%B8%9A%E8%AE%AD%E7%BB%83%E8%90%A5-%E7%AC%AC%E4%BA%94%E5%91%A8/"><meta property="og:width" content="200"><meta property="og:height" content="200"><meta name=twitter:card content="summary"><meta name=twitter:title content="机器学习基础作业班 第五周"><meta name=twitter:description content="我们已经学过卷积神经⽹络以及对应的⼀些经典模型，这次课开始进⼊时序信息处理的模型。其实这两种技术对应了深度学习⾥⾯两个主流领域，计算机视觉(cv)和⾃然语⾔处理(NLP)。
+先来思考⼀个问题，为什么经常使⽤卷积神经⽹络来处理图像问题，⽤时序模型来处理⾃然语⾔问题？因为在图像处理过程中，图像空间信息很重要。⼀个像素点和它上下左右周围⼀圈包围的像素点关系密切，⽽全连接神经
+⽹络在将图像数据展开的同时会丢掉这些信息，所以卷积核的作⽤就能将⼀个⼩空间范围内的信息⼀起处理，这就很合理了。
+然⽽⾃然语⾔⾥⾯的问题更多依赖的是上下⽂（当前⽂字的前⾯和后⾯的若⼲⻓度的⽂字）关系，⽽不是空间关系，就像你做完形填空，你不会着重关注这个空对应的上⼀⾏这个位置的词和下⼀⾏这个位置的词⼀样。
+所以我们现在关注的是前后若⼲个时间单位的信息对当前信息的影响，这就是时间序列模型的由来。这次内容我们会学习到经典的简单RNN 和 LSTM 。
+可以把时序模型常解决的问题根据输⼊和输出的序列⻓度分为有这样⼏种情况：&#34;1-N&#34;、&#34;N-1&#34;、&#34;N-N&#34;(输⼊输出都为多个但是等⻓)、&#34;N-M&#34;（输⼊输出都为多个但不等⻓）。
+①这可以具体对应哪些问题？分别举例说明。  &ldquo;1-N&#34;情况：这种情况下，输入序列长度为1，输出序列长度为N。典型的实际应用如：  输入某个时间点的数据，例如股票价格、天气信息等，预测接下来几个时间点的数据。例如，输入今天的股票价格，预测接下来3天的股票价格。   &ldquo;N-1&#34;情况：这种情况下，输入序列长度为N，输出序列长度为1。典型的实际应用如：  在自然语言处理中，可将一段文本输入模型，输出为该文本的情感分类（如正面、负面）。此时，输入为一段文本（N个词），输出为一个类别。 在时间序列预测中，输入历史数据，预测下一个时间点的值。例如，输入过去一个月的销量数据，预测明天的销量。   &ldquo;N-N&#34;情况：这种情况下，输入序列长度为N，输出序列长度也为N。典型的实际应用如：  机器翻译：将一段源语言文本翻译成目标语言文本。输入为一段源语言文本（N个词），输出为目标语言文本（N个词，源序列与目标序列一一对应）。 序列标注任务：输入一段文本，为每个词分配一个标签。例如，命名实体识别（将人名、地名等标注出来）。输入序列为文本（N个词），输出序列为标签（N个标签，与输入文本一一对应）。   &ldquo;N-M&#34;情况：这种情况下，输入序列长度为N，输出序列长度为M（N和M可以不等长）。典型的实际应用如：  文本摘要任务：根据输入的一段较长的文本，输出一段较短的摘要。此时，输入为一段长文本（N个词），输出为一段摘要（M个词，M小于N）。例如，根据新闻报道生成简短的新闻标题。 对话系统：输入为用户的多个对话轮次（N轮），输出为机器人的多个回复（M轮）。例如，在输入用户提问的过程中，机器人可能会在中间插入一些引导性的问题或补充提醒，从而使得输入和输出序列长度不同。    假如我们现在要从这句话&#34;你知道中国有个教AI的⽼师叫陶卓吗&#34;中识别出⼈名，"><meta name=twitter:image content="https://www.knowlnk.tech/icon.png"><title>机器学习基础作业班 第五周</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel="shortcut icon" type=image/png href=https://www.knowlnk.tech//icon.png><link href=https://www.knowlnk.tech/styles.80333fa2099c0bee674efa435fde378c.min.css rel=stylesheet><link href=https://www.knowlnk.tech/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css rel=stylesheet id=theme-link><script src=https://www.knowlnk.tech/js/darkmode.fb33e48379e1030738da955472e32fad.min.js></script>
+<script src=https://www.knowlnk.tech/js/util.00639692264b21bc3ee219733d38a8be.min.js></script>
+<link rel=preload href=https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css as=style onload='this.onload=null,this.rel="stylesheet"' integrity=sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js integrity=sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx crossorigin=anonymous></script>
+<script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js integrity=sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR crossorigin=anonymous></script>
+<script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js integrity=sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A crossorigin=anonymous></script>
+<script src=https://cdn.jsdelivr.net/npm/@floating-ui/core@1.2.1></script>
+<script src=https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.2.1></script>
+<script defer src=https://www.knowlnk.tech/js/popover.aa9bc99c7c38d3ae9538f218f1416adb.min.js></script>
+<script defer src=https://www.knowlnk.tech/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js></script>
+<script defer src=https://www.knowlnk.tech/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js></script>
+<script defer src=https://www.knowlnk.tech/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js></script>
+<script>const SEARCH_ENABLED=!1,LATEX_ENABLED=!0,PRODUCTION=!0,BASE_URL="https://www.knowlnk.tech/",fetchData=Promise.all([fetch("https://www.knowlnk.tech/indices/linkIndex.d6c8376188db408bf8fa89b451143502.min.json").then(e=>e.json()).then(e=>({index:e.index,links:e.links})),fetch("https://www.knowlnk.tech/indices/contentIndex.dc1525c67b49c1ee75637756002da0f2.min.json").then(e=>e.json())]).then(([{index:e,links:t},n])=>({index:e,links:t,content:n})),render=()=>{const e=new URL(BASE_URL),t=e.pathname,n=window.location.pathname,s=t==n;addCopyButtons(),addTitleToCodeBlocks(),addCollapsibleCallouts(),initPopover("https://www.knowlnk.tech",!0);const o=document.getElementById("footer");if(o){const e=document.getElementById("graph-container");if(!e)return requestAnimationFrame(render);e.textContent="";const t=s&&!1;drawGraph("https://www.knowlnk.tech",t,[{"/moc":"#4388cc"}],t?{centerForce:1,depth:-1,enableDrag:!0,enableLegend:!1,enableZoom:!0,fontSize:.5,linkDistance:1,opacityScale:3,repelForce:1,scale:1.4}:{centerForce:1,depth:1,enableDrag:!0,enableLegend:!1,enableZoom:!0,fontSize:.6,linkDistance:1,opacityScale:3,repelForce:2,scale:1.2})}var i=document.getElementsByClassName("mermaid");i.length>0&&import("https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs").then(e=>{e.default.init()});function a(n){const e=n.target,t=e.className.split(" "),s=t.includes("broken"),o=t.includes("internal-link");plausible("Link Click",{props:{href:e.href,broken:s,internal:o,graph:!1}})}const r=document.querySelectorAll("a");for(link of r)link.className.includes("root-title")&&link.addEventListener("click",a,{once:!0})},init=(e=document)=>{addCopyButtons(),addTitleToCodeBlocks(),renderMathInElement(e.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],macros:{'’':"'"},throwOnError:!1})}</script><script type=module>
+    import { attachSPARouting } from "https:\/\/www.knowlnk.tech\/js\/router.d6fe6bd821db9ea97f9aeefae814d8e7.min.js"
+    attachSPARouting(init, render)
+  </script><script defer data-domain=www.knowlnk.tech src=https://plausible.io/js/script.js></script>
+<script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}</script></head><body><div id=search-container><div id=search-space><input autocomplete=off id=search-bar name=search type=text aria-label=Search placeholder="Search for something..."><div id=results-container></div></div></div><script src=https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin=anonymous defer></script>
+<script defer src=https://www.knowlnk.tech/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js></script><div class=singlePage><header><h1 id=page-title><a class=root-title href=https://www.knowlnk.tech/>寻剑之路</a></h1><div class=spacer></div><div id=search-icon><p>Search</p><svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg></div><div class=darkmode><input class=toggle id=darkmode-toggle type=checkbox tabindex=-1>
+<label id=toggle-label-light for=darkmode-toggle tabindex=-1><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="dayIcon" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35"><title>Light Mode</title><path d="M6 17.5C6 16.672 5.328 16 4.5 16h-3C.672 16 0 16.672.0 17.5S.672 19 1.5 19h3C5.328 19 6 18.328 6 17.5zM7.5 26c-.414.0-.789.168-1.061.439l-2 2C4.168 28.711 4 29.086 4 29.5 4 30.328 4.671 31 5.5 31c.414.0.789-.168 1.06-.44l2-2C8.832 28.289 9 27.914 9 27.5 9 26.672 8.329 26 7.5 26zm10-20C18.329 6 19 5.328 19 4.5v-3C19 .672 18.329.0 17.5.0S16 .672 16 1.5v3C16 5.328 16.671 6 17.5 6zm10 3c.414.0.789-.168 1.06-.439l2-2C30.832 6.289 31 5.914 31 5.5 31 4.672 30.329 4 29.5 4c-.414.0-.789.168-1.061.44l-2 2C26.168 6.711 26 7.086 26 7.5 26 8.328 26.671 9 27.5 9zM6.439 8.561C6.711 8.832 7.086 9 7.5 9 8.328 9 9 8.328 9 7.5c0-.414-.168-.789-.439-1.061l-2-2C6.289 4.168 5.914 4 5.5 4 4.672 4 4 4.672 4 5.5c0 .414.168.789.439 1.06l2 2.001zM33.5 16h-3c-.828.0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5h3c.828.0 1.5-.672 1.5-1.5S34.328 16 33.5 16zM28.561 26.439C28.289 26.168 27.914 26 27.5 26c-.828.0-1.5.672-1.5 1.5.0.414.168.789.439 1.06l2 2C28.711 30.832 29.086 31 29.5 31c.828.0 1.5-.672 1.5-1.5.0-.414-.168-.789-.439-1.061l-2-2zM17.5 29c-.829.0-1.5.672-1.5 1.5v3c0 .828.671 1.5 1.5 1.5s1.5-.672 1.5-1.5v-3C19 29.672 18.329 29 17.5 29zm0-22C11.71 7 7 11.71 7 17.5S11.71 28 17.5 28 28 23.29 28 17.5 23.29 7 17.5 7zm0 18c-4.136.0-7.5-3.364-7.5-7.5s3.364-7.5 7.5-7.5 7.5 3.364 7.5 7.5S21.636 25 17.5 25z"/></svg></label><label id=toggle-label-dark for=darkmode-toggle tabindex=-1><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="nightIcon" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'"><title>Dark Mode</title><path d="M96.76 66.458c-.853-.852-2.15-1.064-3.23-.534-6.063 2.991-12.858 4.571-19.655 4.571C62.022 70.495 50.88 65.88 42.5 57.5 29.043 44.043 25.658 23.536 34.076 6.47c.532-1.08.318-2.379-.534-3.23-.851-.852-2.15-1.064-3.23-.534-4.918 2.427-9.375 5.619-13.246 9.491-9.447 9.447-14.65 22.008-14.65 35.369.0 13.36 5.203 25.921 14.65 35.368s22.008 14.65 35.368 14.65c13.361.0 25.921-5.203 35.369-14.65 3.872-3.871 7.064-8.328 9.491-13.246C97.826 68.608 97.611 67.309 96.76 66.458z"/></svg></label></div></header><article><h1>机器学习基础作业班 第五周</h1><p class=meta>Last updated
+Unknown
+<a href=https://github.com/rootyue/myblog/tree/hugo/content/notes/machine_leaning/begin_home_work/%e4%bd%9c%e4%b8%9a%e8%ae%ad%e7%bb%83%e8%90%a5%20%e7%ac%ac%e4%ba%94%e5%91%a8.md rel=noopener>Edit Source</a></p><ul class=tags><li><a href=https://www.knowlnk.tech/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a></li></ul><aside class=mainTOC><details><summary>Table of Contents</summary><nav id=TableOfContents><ol><li><ol><li><a href=#这可以具体对应哪些问题分别举例说明>①这可以具体对应哪些问题？分别举例说明。</a></li><li><a href=#这对应的问题中哪个情况解决这个问题该怎么做>②这对应的问题①中哪个情况？解决这个问题该怎么做？</a></li><li><a href=#通常情况下会先进分词然后对每个词进编码也可以不分词直接对每个字进编码编码的两种基本处理法是one-hot和word2vec请分别解释这两种编码式并举例说明>通常情况下会先进⾏分词然后对每个词进⾏编码（也可以不分词直接对每个字进⾏编码），编码的两种基本处理⽅法是"one-hot"和"word2vec"，③请分别解释这两种编码⽅式，并举例说明。</a></li></ol></li><li><a href=#rnn--recurrent-neural-network->RNN ( Recurrent Neural Network )</a><ol><li><a href=#根据上图来解释rnn的计算过程>④根据上图来解释RNN的计算过程。</a></li><li><a href=#模型中需要学习的参数在哪有组请在上图中画出>⑤模型中需要学习的参数在哪⼉？有⼏组？请在上图中画出。</a></li><li><a href=#中间某时刻的输出h应当如何求得>⑥中间某时刻的输出h应当如何求得？</a></li><li><a href=#对于当前的问题损失应当如何求得>⑦对于当前的问题，损失应当如何求得？</a></li><li><a href=#这样基于时间的反向传播如何进>⑧这样基于时间的反向传播如何进⾏？</a></li><li><a href=#为什么说这样的络能够传递时间序列信息>⑨为什么说这样的⽹络能够传递时间序列信息？</a></li><li><a href=#参考n-1结构设计rnn络实现mnist的识别>⑩参考"N-1"结构，设计RNN⽹络实现MNIST的识别。</a></li></ol></li><li><a href=#lstmlong-short-term-memory-unit>LSTM(Long Short-Term Memory unit)</a><ol><li><a href=#现在在这过程中使的激活函数有sigmoid和tanh请解释上图中所有标记和符号>现在在这过程中使⽤的激活函数有"sigmoid"和"Tanh",⑪请解释上图中所有标记和符号。</a></li><li><a href=#如何计算得到遗忘的具体数值>⑫如何计算得到遗忘⻔的具体数值？</a></li><li><a href=#遗忘后的记忆信息如何表示>⑬遗忘后的记忆信息如何表示？</a></li><li><a href=#如何计算得到输的具体数值>⑭如何计算得到输⼊⻔的具体数值？</a></li><li><a href=#输新信息后的记忆信息如何表示>⑮输⼊新信息后的记忆信息如何表示？</a></li><li><a href=#如何计算得到输出的具体数值>⑯如何计算得到输出⻔的具体数值？</a></li><li><a href=#t时刻的输出a如何求得>⑰t时刻的输出a如何求得？</a></li><li><a href=#现在这个lstm的主要问题就分析完了可是为什么这样设计就能缓解了rnn中的梯度不稳定问题呢>现在，这个LSTM的主要问题就分析完了，可是，⑱为什么这样设计就能缓解了RNN中的梯度不稳定问题呢？</a></li><li><a href=#有余的同学可以了解下基于lstm的些变种>⑲有余⼒的同学，可以了解下基于LSTM的⼀些变种。</a></li><li><a href=#来lstm也试试实现mnist的分类吧>⑳来，⽤LSTM也试试实现MNIST的分类吧</a></li></ol></li></ol></nav></details></aside><p>我们已经学过卷积神经⽹络以及对应的⼀些经典模型，这次课开始进⼊时序信息处理的模型。其实这两种技术对应了深度学习⾥⾯两个主流领域，计算机视觉(cv)和⾃然语⾔处理(NLP)。</p><p>先来思考⼀个问题，为什么经常使⽤卷积神经⽹络来处理图像问题，⽤时序模型来处理⾃然语⾔问题？因为在图像处理过程中，图像空间信息很重要。⼀个像素点和它上下左右周围⼀圈包围的像素点关系密切，⽽全连接神经</p><p>⽹络在将图像数据展开的同时会丢掉这些信息，所以卷积核的作⽤就能将⼀个⼩空间范围内的信息⼀起处理，这就很合理了。</p><p>然⽽⾃然语⾔⾥⾯的问题更多依赖的是上下⽂（当前⽂字的前⾯和后⾯的若⼲⻓度的⽂字）关系，⽽不是空间关系，就像你做完形填空，你不会着重关注这个空对应的上⼀⾏这个位置的词和下⼀⾏这个位置的词⼀样。</p><p>所以我们现在关注的是前后若⼲个时间单位的信息对当前信息的影响，这就是时间序列模型的由来。这次内容我们会学习到经典的简单RNN 和 LSTM 。</p><p>可以把时序模型常解决的问题根据输⼊和输出的序列⻓度分为有这样⼏种情况："1-N"、"N-1"、"N-N"(输⼊输出都为多个但是等⻓)、"N-M"（输⼊输出都为多个但不等⻓）。</p><a href=#这可以具体对应哪些问题分别举例说明><h3 id=这可以具体对应哪些问题分别举例说明><span class=hanchor arialabel=Anchor># </span>①这可以具体对应哪些问题？分别举例说明。</h3></a><ol><li>&ldquo;1-N"情况：这种情况下，输入序列长度为1，输出序列长度为N。典型的实际应用如：<ul><li>输入某个时间点的数据，例如股票价格、天气信息等，预测接下来几个时间点的数据。例如，输入今天的股票价格，预测接下来3天的股票价格。</li></ul></li><li>&ldquo;N-1"情况：这种情况下，输入序列长度为N，输出序列长度为1。典型的实际应用如：<ul><li>在自然语言处理中，可将一段文本输入模型，输出为该文本的情感分类（如正面、负面）。此时，输入为一段文本（N个词），输出为一个类别。</li><li>在时间序列预测中，输入历史数据，预测下一个时间点的值。例如，输入过去一个月的销量数据，预测明天的销量。</li></ul></li><li>&ldquo;N-N"情况：这种情况下，输入序列长度为N，输出序列长度也为N。典型的实际应用如：<ul><li>机器翻译：将一段源语言文本翻译成目标语言文本。输入为一段源语言文本（N个词），输出为目标语言文本（N个词，源序列与目标序列一一对应）。</li><li>序列标注任务：输入一段文本，为每个词分配一个标签。例如，命名实体识别（将人名、地名等标注出来）。输入序列为文本（N个词），输出序列为标签（N个标签，与输入文本一一对应）。</li></ul></li><li>&ldquo;N-M"情况：这种情况下，输入序列长度为N，输出序列长度为M（N和M可以不等长）。典型的实际应用如：<ul><li>文本摘要任务：根据输入的一段较长的文本，输出一段较短的摘要。此时，输入为一段长文本（N个词），输出为一段摘要（M个词，M小于N）。例如，根据新闻报道生成简短的新闻标题。</li><li>对话系统：输入为用户的多个对话轮次（N轮），输出为机器人的多个回复（M轮）。例如，在输入用户提问的过程中，机器人可能会在中间插入一些引导性的问题或补充提醒，从而使得输入和输出序列长度不同。</li></ul></li></ol><p>假如我们现在要从这句话"你知道中国有个教AI的⽼师叫陶卓吗"中识别出⼈名，</p><a href=#这对应的问题中哪个情况解决这个问题该怎么做><h3 id=这对应的问题中哪个情况解决这个问题该怎么做><span class=hanchor arialabel=Anchor># </span>②这对应的问题①中哪个情况？解决这个问题该怎么做？</h3></a><blockquote><p>从这句话"你知道中国有个教AI的老师叫陶卓吗"中识别出人名，这对应前者中说的"N-1"情况。因为输入是一个长度为N的序列（整句话），输出是一个长度为1的序列（人名）。</p></blockquote><a href=#通常情况下会先进分词然后对每个词进编码也可以不分词直接对每个字进编码编码的两种基本处理法是one-hot和word2vec请分别解释这两种编码式并举例说明><h3 id=通常情况下会先进分词然后对每个词进编码也可以不分词直接对每个字进编码编码的两种基本处理法是one-hot和word2vec请分别解释这两种编码式并举例说明><span class=hanchor arialabel=Anchor># </span>通常情况下会先进⾏分词然后对每个词进⾏编码（也可以不分词直接对每个字进⾏编码），编码的两种基本处理⽅法是"one-hot"和"word2vec"，③请分别解释这两种编码⽅式，并举例说明。</h3></a><p>要从这句话"你知道中国有个教AI的老师叫陶卓吗"中识别出人名，可以使用命名实体识别（Named Entity Recognition，NER）方法。首先对句子进行分词处理，然后对每个词进行编码。编码主要有两种常见方法：&ldquo;one-hot"和"word2vec&rdquo;。</p><ol><li>One-hot编码：</li></ol><p>One-hot编码是一种用二进制向量表示词语的方法。它将每一个词汇表示为一个向量，这个向量的长度为词汇表中所有词的数量，其中向量的一个元素为1，表示当前词汇，其他元素都为0。</p><p>例如，我们的词汇表中有5个词：{&ldquo;中国&rdquo;，&ldquo;有个&rdquo;，&ldquo;教AI的&rdquo;，&ldquo;老师&rdquo;，&ldquo;叫陶卓&rdquo; }，词汇表中每个词所对应的one-hot编码：</p><p>中国 -> [1, 0, 0, 0, 0]
+有个 -> [0, 1, 0, 0, 0]
+教AI的 -> [0, 0, 1, 0, 0]
+老师 -> [0, 0, 0, 1, 0]
+叫陶卓 -> [0, 0, 0, 0, 1]</p><p>缺点是向量维度过高，耗费计算资源，且无法表示词汇之间的关联信息。</p><ol start=2><li>Word2vec编码：</li></ol><p>Word2vec编码是一种连续向量空间模型，将词汇表中的每个词映射到一个连续的向量空间，词汇之间的关联性表现为向量的距离或夹角。Word2vec通常基于上下文来训练模型，捕捉词汇间的关系。</p><p>例如，预先训练好的word2vec模型将每个词汇映射到一个固定长度的向量，如下所示：</p><p>中国 -> [0.1, 0.3, -0.2, 0.5, 0.05]
+有个 -> [0.2, -0.1, 0.4, 0.3, -0.1]
+教AI的 -> [0.3, 0.2, -0.1, 0.4, 0.1]
+老师 -> [-0.1, 0.5, 0.1, 0.1, 0.2]
+叫陶卓 -> [0.3, 0.1, 0.05, 0.2, 0.45]</p><p>通过Word2vec编码，可以获得词汇之间的关系和相似性。例如，“中国”和“教AI的”在某些维度上可能有较高的值，表示它们有关联。这种编码方式的计算量较小且能表示词汇间的关联信息。</p><p>总之，one-hot编码和word2vec编码都可以将词汇转换为数值表示，以便计算机处理。one-hot编码适用于简单场景，计算简单，但无法表示词汇间的关联。Word2vec编码能捕捉词汇间的关系，计算量较小，更适合表示词汇间的关联信息。</p><a href=#rnn--recurrent-neural-network-><h2 id=rnn--recurrent-neural-network-><span class=hanchor arialabel=Anchor># </span>RNN ( Recurrent Neural Network )</h2></a><p>可以通过下图来解释刚才这个问题使⽤RNN是如何处理的。</p><p><img src=https://www.knowlnk.tech//res/%E4%BD%9C%E4%B8%9A%E8%AE%AD%E7%BB%83%E8%90%A5_%E7%AC%AC%E4%BA%94%E5%91%A8_rnn.png width=auto alt></p><a href=#根据上图来解释rnn的计算过程><h3 id=根据上图来解释rnn的计算过程><span class=hanchor arialabel=Anchor># </span>④根据上图来解释RNN的计算过程。</h3></a><p>将{&ldquo;中国&rdquo;，&ldquo;有个&rdquo;，&ldquo;教AI的&rdquo;，&ldquo;老师&rdquo;，&ldquo;叫陶卓&rdquo; }中每个词汇对应的词向量依次输入到RNN神经网络中进行训练：</p><ol><li>最初时刻，网络的状态 $h_0$ 初始化为0。将第一个单词"你"转换成嵌入向量 $x_1$，并输入RNN网络中进行计算：</li></ol><p>$$a_1 = softmax(W_{ax}x_1 + W_{aa}a_0 + b_a)$$</p><p>其中，$W_{ax}$ 是输入权重矩阵，$W_{aa}$ 是上一次处理结果的权重矩阵，$b_a$ 是偏置向量。</p><p>然后，我们可以使用$h_1$的计算公式来计算隐藏层的状态：</p><p>$$h_1 = tanh(W_{h}a_1 + b_h)$$</p><p>其中，$W_{h}$ 是将输出转换为隐藏状态的权重矩阵， $b_{h}$ 是隐藏层的偏置向量。</p><p>2.现在，第一个单词"你"已经被传输并进入第一个隐藏层，我们需要处理句子中的下一个单词"知道&rdquo;。将"知道"转换为嵌入向量 $x_2$ 并输入RNN网络。我们可以将上一个时间步的处理结果 $a_1$作为输入。</p><p>$$a_2 = softmax(W_{ax}x_2 + W_{aa}a_1 + b_a)$$</p><p>$$h_2 = tanh(W_{h}a_2 + b_h)$$</p><p>3.现在，我们将第二个单词的处理结果 $a_2$ 作为下一个隐藏层 $a_3$ 的输入。继续以这种方式进行句子中所有单词的处理。</p><p>$$a_3 = softmax(W_{ax}x_3 + W_{aa}a_2 + b_a)$$</p><p>$$h_3 = tanh(W_{h}a_3 + b_h)$$</p><p>$$a_4 = softmax(W_{ax}x_4 + W_{aa}a_3 + b_a)$$</p><p>$$h_4 = tanh(W_{h}a_4 + b_h)$$</p><p>$$a_5 = softmax(W_{ax}x_5 + W_{aa}a_4 + b_a)$$</p><p>$$h_5 = tanh(W_{h}a_5 + b_h)$$</p><p>$$a_6 = softmax(W_{ax}x_6 + W_{aa}a_5 + b_a)$$</p><p>$$h_6 = tanh(W_{h}a_6 + b_h)$$</p><p>$$a_7 = softmax(W_{ax}x_7 + W_{aa}a_6 + b_a)$$</p><p>$$h_7 = tanh(W_{h}a_7 + b_h)$$</p><p>在这个过程中，每个时间步都充当序列中的一个单词，并生成一个输出向量 $a$ 以及一个隐藏状态向量 $h$ 作为最后的预测结果。重要的是，RNNs的隐藏状态从一个时间步流传到下一个时间步，并且在整个时间序列中共享参数。这使得RNNs非常适合处理输入数据组成的序列，如自然语言句子。</p><a href=#模型中需要学习的参数在哪有组请在上图中画出><h3 id=模型中需要学习的参数在哪有组请在上图中画出><span class=hanchor arialabel=Anchor># </span>⑤模型中需要学习的参数在哪⼉？有⼏组？请在上图中画出。</h3></a><blockquote><p>一共有3组，分别是 $W_{ax}$ $W_{aa}$ $W_h$</p></blockquote><a href=#中间某时刻的输出h应当如何求得><h3 id=中间某时刻的输出h应当如何求得><span class=hanchor arialabel=Anchor># </span>⑥中间某时刻的输出h应当如何求得？</h3></a><p>将当前时刻输出乘以 $W_h$ 矩阵 加上 $b_h$ 偏置后应用激活函数即可
+$$h_1 = tanh(W_{h}a_1 + b_h)$$</p><a href=#对于当前的问题损失应当如何求得><h3 id=对于当前的问题损失应当如何求得><span class=hanchor arialabel=Anchor># </span>⑦对于当前的问题，损失应当如何求得？</h3></a><p>在当前问题中，我们使用RNN预测自然语言句子中每个单词的下一个单词。我们可以使用交叉熵损失函数（cross-entropy loss）来衡量模型的损失。交叉熵损失函数被广泛用于分类问题中，其可以衡量模型预测的概率分布与实际概率分布之间的差异。而在本问题中，我们希望用它来度量模型预测下一个单词的概率分布与实际下一个单词的标签之间的差异。</p><p>对于每个时间步 $t$，我们可以使用下面的公式计算交叉熵损失函数：</p><p>$$L_{t}=-\sum_{i=1}^{V} y_{t,i} \log a_{t,i} $$</p><p>其中 $V$ 表示词汇表的大小；$y_{t}$ 是真实下一个单词的标签 one-hot 向量，其中仅有一个元素为 $1$，与当前时间步对应； $a_{t}$ 是模型在当前时间步预测下一个单词的概率分布向量，可以通过 softmax 函数进行计算。上式中，用于计算交叉熵损失函数的具体表达式可以理解为：首先对所有可能的标签概率进行对数变换，然后与对应的真实标签进行逐元素相乘后得到一组交叉熵损失值，最后对这些损失值进行求和，得到该时间步损失函数的值。</p><p>总体上，我们需要对序列的所有时间步骤上的损失进行求和，用 $L_{total}$ 表示总的损失函数，公式为：</p><p>$$L_{total} = \sum_{t=1}^{T}L_{t}$$</p><p>其中 $T$ 表示句子中单词的总数。最小化 $L_{total}$ 可以使模型更准确地预测下一个单词，进而提高模型的能力。</p><a href=#这样基于时间的反向传播如何进><h3 id=这样基于时间的反向传播如何进><span class=hanchor arialabel=Anchor># </span>⑧这样基于时间的反向传播如何进⾏？</h3></a><a href=#为什么说这样的络能够传递时间序列信息><h3 id=为什么说这样的络能够传递时间序列信息><span class=hanchor arialabel=Anchor># </span>⑨为什么说这样的⽹络能够传递时间序列信息？</h3></a><p>RNN网络是一种可以处理序列数据的神经网络，其结构中具有时间步的概念，并且在不同时刻可以使用相同的权值和偏置来计算输出和隐藏层值。</p><p>因此，当输入RNN网络的是一个时间序列的数据时，例如语言句子或深度学习中的音频，视频数据等，RNN网络可以通过反复传递前一时刻的隐藏状态做到信息记忆传递。</p><p>在每个时间步上，RNN将输入与先前时间步的隐藏状态一起组合，并生成一个新的隐藏状态，同时生成预测输出。这个新状态可以被传递到下一个时间步上，并作为第一个新状态的一部分，这样一直循环下去。在这个过程中，RNN携带和传递了输入序列中随时间变化的信息，从而在模型中捕获数据的序列特征。这意味着 RNN 的隐藏状态在当前时刻捕捉到的信息会影响到后续时刻的隐藏状态和输出。</p><p>因此，我们可以将RNN描述为一种可以处理时间序列数据的神经网络，并且随着时间的推移，每个隐藏状态可以捕捉到从序列开始到当前时间步长的信息，这使得RNN网络能够容易的传递和利用时间序列中的信息，可以用于预测和生成输出序列的任务。</p><a href=#参考n-1结构设计rnn络实现mnist的识别><h3 id=参考n-1结构设计rnn络实现mnist的识别><span class=hanchor arialabel=Anchor># </span>⑩参考"N-1"结构，设计RNN⽹络实现MNIST的识别。</h3></a><p>对于这种情况，我们需要将RNN网络改为一个接收长度为1的序列并产生长度为N的输出序列的模型。在PyTorch中，我们可以使用nn.RNN函数来创建一个基本的RNN层。为了将其应用于变长序列输入，我们需要将batch_size设置为1并向前传递一个时间步长的输入。在每个时间步长上，我们可以通过将输入以及上一时间步的隐藏状态作为输入到RNN层，然后计算输出和隐藏状态。在得到最终输出后，我们可以将输出通过softmax函数进行计算，将其转换为概率分布并得到预测结果。我们可以根据一个类似的方式来训练和优化模型。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch</span> 
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch.nn</span> <span class=k>as</span> <span class=nn>nn</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch.optim</span> <span class=k>as</span> <span class=nn>optim</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>torchvision</span> <span class=kn>import</span> <span class=n>datasets</span><span class=p>,</span><span class=n>transforms</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 定义超参数和数据预处理</span>
+</span></span><span class=line><span class=cl><span class=n>input_size</span> <span class=o>=</span> <span class=mi>28</span>
+</span></span><span class=line><span class=cl><span class=n>hidden_size</span> <span class=o>=</span> <span class=mi>128</span>
+</span></span><span class=line><span class=cl><span class=n>output_size</span> <span class=o>=</span> <span class=mi>10</span>
+</span></span><span class=line><span class=cl><span class=n>num_layers</span> <span class=o>=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl><span class=n>learning_rate</span> <span class=o>=</span> <span class=mf>0.01</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>transform</span> <span class=o>=</span> <span class=n>transforms</span><span class=o>.</span><span class=n>Compose</span><span class=p>([</span>
+</span></span><span class=line><span class=cl>    <span class=n>transforms</span><span class=o>.</span><span class=n>ToTensor</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>    <span class=n>transforms</span><span class=o>.</span><span class=n>Normalize</span><span class=p>((</span><span class=mf>0.1307</span><span class=p>,),</span> <span class=p>(</span><span class=mf>0.3081</span><span class=p>,))</span>
+</span></span><span class=line><span class=cl><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 加载MNIST数据集</span>
+</span></span><span class=line><span class=cl><span class=n>train_dataset</span> <span class=o>=</span> <span class=n>datasets</span><span class=o>.</span><span class=n>MNIST</span><span class=p>(</span><span class=s1>&#39;../data&#39;</span><span class=p>,</span> <span class=n>train</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span> <span class=n>download</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>transform</span><span class=o>=</span><span class=n>transform</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>test_dataset</span> <span class=o>=</span> <span class=n>datasets</span><span class=o>.</span><span class=n>MNIST</span><span class=p>(</span><span class=s1>&#39;../data&#39;</span><span class=p>,</span> <span class=n>train</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>            <span class=n>transform</span><span class=o>=</span><span class=n>transform</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>train_loader</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>utils</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>DataLoader</span><span class=p>(</span><span class=n>train_dataset</span><span class=p>,</span> <span class=n>batch_size</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>                                        <span class=n>shuffle</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>test_loader</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>utils</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>DataLoader</span><span class=p>(</span><span class=n>test_dataset</span><span class=p>,</span> <span class=n>batch_size</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>                                        <span class=n>shuffle</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 构建RNN模型</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>RNN</span><span class=p>(</span><span class=n>nn</span><span class=o>.</span><span class=n>Module</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>input_size</span><span class=p>,</span> <span class=n>hidden_size</span><span class=p>,</span> <span class=n>output_size</span><span class=p>,</span> <span class=n>num_layers</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>(</span><span class=n>RNN</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>hidden_size</span> <span class=o>=</span> <span class=n>hidden_size</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>num_layers</span> <span class=o>=</span> <span class=n>num_layers</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>lstm</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>LSTM</span><span class=p>(</span><span class=n>input_size</span><span class=p>,</span> <span class=n>hidden_size</span><span class=p>,</span> <span class=n>num_layers</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>fc</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>Linear</span><span class=p>(</span><span class=n>hidden_size</span><span class=p>,</span> <span class=n>output_size</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>h0</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>num_layers</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>hidden_size</span><span class=p>)</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>c0</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>num_layers</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>hidden_size</span><span class=p>)</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=p>,</span> <span class=n>_</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>lstm</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=p>(</span><span class=n>h0</span><span class=p>,</span> <span class=n>c0</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>out</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>fc</span><span class=p>(</span><span class=n>out</span><span class=p>[</span><span class=o>-</span><span class=mi>1</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 初始化模型并定义损失函数和优化器</span>
+</span></span><span class=line><span class=cl><span class=n>device</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>device</span><span class=p>(</span><span class=s1>&#39;cuda&#39;</span> <span class=k>if</span> <span class=n>torch</span><span class=o>.</span><span class=n>cuda</span><span class=o>.</span><span class=n>is_available</span><span class=p>()</span> <span class=k>else</span> <span class=s1>&#39;cpu&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>model</span> <span class=o>=</span> <span class=n>RNN</span><span class=p>(</span><span class=n>input_size</span><span class=p>,</span> <span class=n>hidden_size</span><span class=p>,</span> <span class=n>output_size</span><span class=p>,</span> <span class=n>num_layers</span><span class=p>)</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>criterion</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>CrossEntropyLoss</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>optimizer</span> <span class=o>=</span> <span class=n>optim</span><span class=o>.</span><span class=n>Adam</span><span class=p>(</span><span class=n>model</span><span class=o>.</span><span class=n>parameters</span><span class=p>(),</span> <span class=n>lr</span><span class=o>=</span><span class=n>learning_rate</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 训练模型</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>epoch</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>10</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>running_loss</span> <span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>images</span><span class=p>,</span> <span class=n>labels</span> <span class=ow>in</span> <span class=n>train_loader</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>images</span> <span class=o>=</span> <span class=n>images</span><span class=o>.</span><span class=n>view</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>labels</span> <span class=o>=</span> <span class=n>labels</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>optimizer</span><span class=o>.</span><span class=n>zero_grad</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>outputs</span> <span class=o>=</span> <span class=n>model</span><span class=p>(</span><span class=n>images</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>loss</span> <span class=o>=</span> <span class=n>criterion</span><span class=p>(</span><span class=n>outputs</span><span class=p>,</span> <span class=n>labels</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>loss</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=n>optimizer</span><span class=o>.</span><span class=n>step</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>running_loss</span> <span class=o>+=</span> <span class=n>loss</span><span class=o>.</span><span class=n>item</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Epoch[</span><span class=si>{</span><span class=n>epoch</span><span class=o>+</span><span class=mi>1</span><span class=si>}</span><span class=s2>/10], loss: </span><span class=si>{</span><span class=n>running_loss</span><span class=o>/</span><span class=nb>len</span><span class=p>(</span><span class=n>train_loader</span><span class=p>)</span><span class=si>:</span><span class=s2>.4f</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 测试模型</span>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>torch</span><span class=o>.</span><span class=n>no_grad</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=n>correct</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>images</span><span class=p>,</span> <span class=n>labels</span> <span class=ow>in</span> <span class=n>test_loader</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>images</span> <span class=o>=</span> <span class=n>images</span><span class=o>.</span><span class=n>view</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>labels</span> <span class=o>=</span> <span class=n>labels</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>outputs</span> <span class=o>=</span> <span class=n>model</span><span class=p>(</span><span class=n>images</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>_</span><span class=p>,</span> <span class=n>predicted</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>max</span><span class=p>(</span><span class=n>outputs</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>correct</span> <span class=o>+=</span> <span class=p>(</span><span class=n>predicted</span> <span class=o>==</span> <span class=n>labels</span><span class=p>)</span><span class=o>.</span><span class=n>sum</span><span class=p>()</span><span class=o>.</span><span class=n>item</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Test accuracy: </span><span class=si>{</span><span class=n>correct</span><span class=o>/</span><span class=nb>len</span><span class=p>(</span><span class=n>test_loader</span><span class=p>)</span><span class=o>*</span><span class=mi>100</span><span class=si>:</span><span class=s2>.2f</span><span class=si>}</span><span class=s2>%&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><a href=#lstmlong-short-term-memory-unit><h2 id=lstmlong-short-term-memory-unit><span class=hanchor arialabel=Anchor># </span>LSTM(Long Short-Term Memory unit)</h2></a><p>LSTM是上⾯简单RNN的⼀种变种，其引⼊"⻔控单元"来减缓梯度消失问题，使得模型更容易学习到⻓期依赖。换句话说记住⻓期信息是LSTM的默认⾏为，不是需要付出很⼤代价才能获得的能⼒。来看看它⻓什么样⼦：</p><p><img src=https://www.knowlnk.tech//res/%E4%BD%9C%E4%B8%9A%E8%AE%AD%E7%BB%83%E8%90%A5_%E7%AC%AC%E4%BA%94%E5%91%A8_LSTM.png width=auto alt></p><p>你可以把上图理解成在LSTM中的⼀个处理信息的基本单元。在这⾥：</p><p>a 是当前单元的输出，当然根据不同的问题形式这⾥也可以不输出
+C 代表的是记忆信息
+x 是输⼊的信息
+t 代表某⼀时刻</p><a href=#现在在这过程中使的激活函数有sigmoid和tanh请解释上图中所有标记和符号><h3 id=现在在这过程中使的激活函数有sigmoid和tanh请解释上图中所有标记和符号><span class=hanchor arialabel=Anchor># </span>现在在这过程中使⽤的激活函数有"sigmoid"和"Tanh",⑪请解释上图中所有标记和符号。</h3></a><ul><li>xt：当前时刻t的输入</li><li>ht：当前时刻t的输出，也称为隐藏状态</li><li>ct：当前时刻t的单元状态（cell state）</li><li>ft：当前时刻t的遗忘门值</li><li>it：当前时刻t的输入门值</li><li>ot：当前时刻t的输出门值</li><li>σ：sigmoid激活函数，用于门结构的激活</li><li>tanh：双曲正切激活函数</li></ul><p>在这个结构的设计中，最上⾯的那条线表示模型保留和传递记忆信息 C，但在当前这个t时刻，C 中所有信息也不⼀定要全部拿来使⽤，所以设计了⼀个"遗忘⻔"进去，⽤来控制记忆信息的去留。</p><a href=#如何计算得到遗忘的具体数值><h3 id=如何计算得到遗忘的具体数值><span class=hanchor arialabel=Anchor># </span>⑫如何计算得到遗忘⻔的具体数值？</h3></a><p>在LSTM中，遗忘门（forget gate）是用于控制之前时间步的信息对当前时间步影响的一种机制。其工作原理是通过根据输入序列和上一时间步的隐藏状态来决定需要遗忘的信息。遗忘门的数值是由神经网络层和sigmoid激活函数计算得到的。</p><p>具体来说，遗忘门的数值通过以下公式计算得到：</p><p>$$f_{t}=\sigma (W_{f}[h_{t-1},x_{t}]+b_{f})$$</p><p>其中$W_{f}$和$b_{f}$分别表示遗忘门的权重矩阵和偏置项。$h_{t-1}$表示上一时间步的隐藏状态，而$x_{t}$表示当前时间步的输入。 $\sigma$是sigmoid激活函数，用于将输出限制为介于0和1之间的概率。</p><p>在LSTM模型的训练过程中，我们需要在每个时间步计算遗忘门的值。这样，我们就能在当前时间步中控制遗忘之前时间步的信息。具体来说，可以通过对序列中的所有时间步进行前向计算，用交叉熵损失函数计算模型的损失，再通过反向传播算法计算导数并更新权重矩阵，实现模型的训练和优化。</p><a href=#遗忘后的记忆信息如何表示><h3 id=遗忘后的记忆信息如何表示><span class=hanchor arialabel=Anchor># </span>⑬遗忘后的记忆信息如何表示？</h3></a><p>在LSTM神经网络中，除了遗忘门，还有记忆单元（memory cell）可以帮助模型长期记忆之前时间步的信息。具体来说，在每个时间步中，与遗忘门一起计算得到的新单元状态（cell state）可以通过公式</p><p>$$c_t = f_t \cdot c_{t-1} + i_t \cdot \tilde{c_t} $$</p><p>中的遗忘门$f_t$与以往筛选的新单元状态$\tilde{c_t}$来生成当前时间步的新单元状态$c_t$。这个式子意味着，若前一个时间步的遗忘门$f_{t-1}$的数值为0，则新单元状态$c_{t}$也不会受到之前时间步信息的影响。</p><p>其中，$i_t$是输入门，$\tilde{c_t}$表示新的单元状态，具体计算方式为：</p><p>$$\tilde{c_t} = tanh(W_c \cdot [h_{t-1}, x_t] + b_c)$$</p><p>其中，$W_c$和$b_c$是参数，$h_{t-1}$是上一个时间步的隐藏状态，$x_t$是当前时间步的输入。</p><p>这里，遗忘门的值通过公式：</p><p>$$f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)$$</p><p>计算得到，其中$W_f$和$b_f$是参数，$\sigma$是sigmoid激活函数。</p><p>因此，遗忘后的记忆信息就是新单元状态$c_t$。该信息是由上一个时间步的记忆信息$c_{t-1}$和当前时间步的遗忘门$f_t$计算得到的，表示了模型选择保留哪些之前的信息并将其传递到下一个时间步进行计算。</p><p>输⼊的信息也不⼀定都要拿来使⽤，这⾥还有⼀个"输⼊⻔"来控制输⼊信息的哪部分可以进⼊记忆信息。</p><a href=#如何计算得到输的具体数值><h3 id=如何计算得到输的具体数值><span class=hanchor arialabel=Anchor># </span>⑭如何计算得到输⼊⻔的具体数值？</h3></a><p>在LSTM中，输入门（input gate）的作用是决定当前时间步的输入信息对当前单元状态的影响。具体而言，输入门将前一个时间步的隐藏状态和当前时间步的输入计算为新的输入，该新输入可以与之前的单元状态相加得到当前的单元状态。输入门的具体数值由神经网络层和sigmoid激活函数计算得到。</p><p>具体来说，输入门的数值可以通过以下公式计算得到：</p><p>$$i_{t}=\sigma (W_{i}[h_{t-1},x_{t}]+b_{i})$$</p><p>其中，$W_{i}$和$b_{i}$分别为输入门的权重矩阵和偏置项，$h_{t-1}$表示上一时间步的隐藏状态，$x_{t}$表示当前时间步的输入。$\sigma$为sigmoid激活函数，用于将输出限制为介于0和1之间的概率。</p><p>在LSTM的训练过程中，我们需要在每个时间步计算输入门的数值。这样，我们就能在当前时间步中控制之前时间步的输入信息对记忆信息的影响。具体来说，可以通过对序列中的所有时间步进行前向计算，用交叉熵损失函数计算模型的损失，再通过反向传播算法计算导数并更新权重矩阵，实现模型的训练和优化。</p><a href=#输新信息后的记忆信息如何表示><h3 id=输新信息后的记忆信息如何表示><span class=hanchor arialabel=Anchor># </span>⑮输⼊新信息后的记忆信息如何表示？</h3></a><p>在LSTM中，输入门和遗忘门都帮助模型更好地控制以前的状态是否影响到当前状态，同时新的cell状态也会被生成以输入新的信息。具体来说，对于给定时间步$t$，输入门$i_t$可以决定哪些信息应该输入到新的单元状态，而遗忘门$f_t$可以决定哪些信息应该从旧的单元状态中遗忘。在加入新的信息后，新的cell状态$c_t$计算方式为：</p><p>$$c_t = f_t * c_{t-1} + i_t * \tilde{c_t} $$</p><p>其中，$\tilde{c_t}$是新的信息矩阵。根据当前时间步的输入信息$x_t$和前一时间步的隐藏状态$h_{t-1}$，可以计算出新的信息矩阵。具体计算方式为：</p><p>$$\tilde{c_t} = tanh(W_c \cdot [h_{t-1}, x_t] + b_c)$$</p><p>将上面两个公式代入可得：</p><p>$$c_t = f_t * c_{t-1} + i_t * tanh(W_c \cdot [h_{t-1}, x_t] + b_c)$$</p><p>其中，$W_c$和$b_c$是新信息矩阵的权重矩阵和偏置项。这个式子表明，输入门可以通过$tanh$变换来控制当前时间步新输入数据的输入量，这相当于对新数据进行了筛选处理。遗忘门可以通过与之前倍数相乘来控制旧数据的保留量。这样一来，模型就可以在训练过程中学习长期依赖，并在每个时间步中更好地控制哪些数据会被输入，并控制当前状态与之前状态的权重分配。</p><p>这样，输入新信息后的记忆信息即为新计算出的cell状态$c_t$，它是由当前时间步的输入$x_t$，上一个时间步的隐藏状态$h_{t-1}$，以及前一个时间步的cell状态$c_{t-1}$计算得到的。</p><p>你可能已经猜到，现在的记忆信息是不是都要输出也不⼀定，这⾥还有⼀个"输出⻔"来控制现在的记忆信息中哪些要往后输出。</p><a href=#如何计算得到输出的具体数值><h3 id=如何计算得到输出的具体数值><span class=hanchor arialabel=Anchor># </span>⑯如何计算得到输出⻔的具体数值？</h3></a><p>在LSTM模型中，输出门（output gate）是用来决定当前时间步的隐藏状态ht对当前时间步输出y有何贡献。输出门的具体数值是由神经网络层和sigmoid激活函数计算得到。</p><p>具体而言，输出门的数字可以通过以下公式计算得到：</p><p>$$o_t = \sigma(W_o [h_{t-1}, x_t] + b_o)$$</p><p>其中，$W_o$和$b_o$分别是输出门的权重矩阵和偏置项，$h_{t-1}$表示上一个时间步的隐藏状态，$x_t$表示当前时间步的输入，$\sigma$是sigmoid激活函数，用于将输出限制为介于0和1之间的概率。</p><p>在LSTM的训练过程中，我们需要在每个时间步计算输出门的数值。这将使我们能够控制隐藏状态对当前时间步输出的影响程度，使我们能够进一步优化模型。我们可以通过对序列中的所有时间步进行前向计算，使用交叉熵损失函数计算模型的损失，利用反向传播算法计算导数并更新权重矩阵，最终实现模型的训练和优化。</p><a href=#t时刻的输出a如何求得><h3 id=t时刻的输出a如何求得><span class=hanchor arialabel=Anchor># </span>⑰t时刻的输出a如何求得？</h3></a><p>在LSTM中，当前时间步$t$的输出$a_t$由隐藏状态$h_t$和输出门$o_t$计算得到。而隐藏状态$h_t$是由当前时间步单元状态$c_t$和其对应的$tanh$函数值计算而成。具体而言，输出门$o_t$控制了当前时间步的隐藏状态$h_t$对当前时间步输出$a_t$的影响程度。单元状态$c_t$表示在此时间步长期记忆的内容。因此，$t$时刻的输出$a_t$的具体计算方式为：</p><p>$$a_t = h_t = o_t * tanh(c_t)$$</p><p>其中，</p><p>$$h_t = tanh(c_t)$$</p><p>根据之前的公式：</p><p>$$c_t = f_t * c_{t-1} + i_t * \tilde{c_t} $$</p><p>可以得到单元状态$c_t$，其中$f_t$是遗忘门的值，$i_t$是输入门的值，$\tilde{c_t}$是新的单元状态。将$c_t$代入上面公式中，得到：</p><p>$$a_t = o_t * tanh(c_t) = o_t * tanh(f_t * c_{t-1} + i_t * \tilde{c_t})$$</p><p>现在我们已经知道$f_t$、$i_t$、$\tilde{c_t}$和$o_t$的值，因此，我们可以计算出$tanh(f_t * c_{t-1} + i_t * \tilde{c_t})$并乘以$o_t$，得到当前时间步的隐藏状态$h_t$，最终得到当前时间步的输出$a_t$。</p><p>综上所述，$t$时刻的输出$a_t$是当前时间步的隐藏状态$h_t$乘以输出门$o_t$的值，即：</p><p>$$a_t = h_t * o_t = tanh(c_t) * o_t = o_t * tanh(f_t * c_{t-1} + i_t * \tilde{c_t})$$</p><a href=#现在这个lstm的主要问题就分析完了可是为什么这样设计就能缓解了rnn中的梯度不稳定问题呢><h3 id=现在这个lstm的主要问题就分析完了可是为什么这样设计就能缓解了rnn中的梯度不稳定问题呢><span class=hanchor arialabel=Anchor># </span>现在，这个LSTM的主要问题就分析完了，可是，⑱为什么这样设计就能缓解了RNN中的梯度不稳定问题呢？</h3></a><p>在标准的RNN中，梯度消失和梯度爆炸问题都是由于网络的长期依赖关系造成的。长期依赖关系通常会导致长序列的计算，进而使网络在反向传播过程中的梯度迅速消失或者爆炸。</p><p>而LSTM可以缓解这些问题，主要有以下原因：</p><p>（1）门控机制：LSTM通过引入门控机制来调节信息的流动，包括输入门、遗忘门、输出门等。</p><p>在输入门的影响下，LSTM可以选择性地过滤掉无关的输入信息。在遗忘门的影响下，LSTM可以选择性地遗忘掉一些旧的记忆信息。在输出门的影响下，LSTM可以选择性地输出当前时间步的记忆信息。</p><p>这些门控制机制使得LSTM可以更好地控制信息的流动，在反向传播时梯度可以更好地传播，从而避免梯度消失或者梯度爆炸的问题。可以将门视为一种筛子，使得网络可以在经过多个时间步后，仅保留有用的信息，并遗忘无关的信息，从而使网络更好地处理长序列数据。</p><p>（2）长期记忆单元：LSTM引入了长期记忆单元，该单元可以结合各个时间步的信息，从而使LSTM可以处理长期的信息依赖关系。其结构保持了不同时刻的依赖关系，使得LSTM可以更好地捕捉长期的序列依赖关系。</p><p>（3）非线性变换机制：LSTM使用非线性变换机制，比如双曲正切函数，这使得LSTM可以有效地循环计算信息，并保证每个时间步信息的映射有非线性变换的能力。</p><p>综上所述，LSTM引入的门控制机制及长期记忆单元，以及非线性变换机制，可以有效地缓解RNN中的梯度消失和梯度爆炸的问题。从而使得LSTM可以更好地捕捉长期的依赖关系，并在处理长序列数据时，表现出更出色的性能。</p><a href=#有余的同学可以了解下基于lstm的些变种><h3 id=有余的同学可以了解下基于lstm的些变种><span class=hanchor arialabel=Anchor># </span>⑲有余⼒的同学，可以了解下基于LSTM的⼀些变种。</h3></a><p>除了标准的LSTM之外，还有许多基于LSTM的变体，其中一些变体可以进一步提高模型的性能，包括：</p><ol><li><p>双向LSTM（BiLSTM）：BiLSTM将两个LSTM结构连接在一起。一个LSTM处理正向序列，另一个LSTM处理反向序列。这样可以利用正向和反向信息来捕捉更丰富的上下文语义信息，进一步提高模型的性能。</p></li><li><p>树形LSTM（Tree-LSTM）：适用于处理树型结构数据的LSTM变体。在Tree-LSTM中，每个节点的输入都由其直接前驱节点的输出和子节点的输出产生。这种结构利用了树形信息结构的递归特性，可以更好地建模自然语言中的句法结构，提高自然语言处理任务的性能。</p></li><li><p>注意力机制与LSTM结合（Attention-LSTM）：在Attention-LSTM中，注意力机制用于选择对当前预测最关键的信息，而LSTM用于处理序列的每个时间步。通过结合这两种方法，Attention-LSTM可以选择性地关注输入序列的不同部分，提高模型在序列任务中的性能。</p></li><li><p>多层LSTM：通过增加LSTM的层数，可以更好地建模复杂的序列依赖关系，提高模型的性能。多层LSTM可以在每个时间步将隐藏状态传递到下一层，从而使得模型能够捕捉不同阶段的信息，进一步提高模型的效果。</p></li><li><p>长短时记忆卷积神经网络（LSTM-CNN）：LSTM-CNN是一种将LSTM和卷积神经网络（CNN）结合在一起的模型。LSTM用于处理时间序列数据的长期信息，而CNN则用于学习特征。这种结合可以在不同的任务中提供很好的性能，并且在某些自然语言处理任务中特别有效。</p></li></ol><p>总之，以上这些LSTM的变体可以处理不同类型和形式的输入数据，并用于不同的自然语言处理任务。深入了解这些技术有助于我们更好地选择和使用适用于特定任务的模型。</p><a href=#来lstm也试试实现mnist的分类吧><h3 id=来lstm也试试实现mnist的分类吧><span class=hanchor arialabel=Anchor># </span>⑳来，⽤LSTM也试试实现MNIST的分类吧</h3></a><p>首先，先通过以下代码导入所需的库：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch.nn</span> <span class=k>as</span> <span class=nn>nn</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torchvision.datasets</span> <span class=k>as</span> <span class=nn>dsets</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torchvision.transforms</span> <span class=k>as</span> <span class=nn>transforms</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch.optim</span> <span class=k>as</span> <span class=nn>optim</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>torch.autograd</span> <span class=kn>import</span> <span class=n>Variable</span>
+</span></span></code></pre></td></tr></table></div></div><p>接下来，定义超参数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>input_size</span> <span class=o>=</span> <span class=mi>28</span><span class=c1># 输入大小，MNIST的每行有28个像素</span>
+</span></span><span class=line><span class=cl><span class=n>sequence_length</span> <span class=o>=</span> <span class=mi>28</span><span class=c1># 序列长度，MNIST的每张图片有28行</span>
+</span></span><span class=line><span class=cl><span class=n>num_layers</span> <span class=o>=</span> <span class=mi>2</span><span class=c1># LSTM的层数</span>
+</span></span><span class=line><span class=cl><span class=n>num_classes</span> <span class=o>=</span> <span class=mi>10</span><span class=c1># 10个分类结果，0到9</span>
+</span></span><span class=line><span class=cl><span class=n>batch_size</span> <span class=o>=</span> <span class=mi>100</span><span class=c1># 每次批量处理的图片数量</span>
+</span></span><span class=line><span class=cl><span class=n>hidden_size</span> <span class=o>=</span> <span class=mi>128</span><span class=c1># 隐藏层维度</span>
+</span></span><span class=line><span class=cl><span class=n>num_epochs</span> <span class=o>=</span> <span class=mi>5</span><span class=c1># 执行的epoch数</span>
+</span></span><span class=line><span class=cl><span class=n>learning_rate</span> <span class=o>=</span> <span class=mf>0.01</span><span class=c1># 学习速率</span>
+</span></span></code></pre></td></tr></table></div></div><p>加载MNIST数据集：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>train_dataset</span> <span class=o>=</span> <span class=n>dsets</span><span class=o>.</span><span class=n>MNIST</span><span class=p>(</span><span class=n>root</span><span class=o>=</span><span class=s1>&#39;./data&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                            <span class=n>train</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                            <span class=n>transform</span><span class=o>=</span><span class=n>transforms</span><span class=o>.</span><span class=n>ToTensor</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>                            <span class=n>download</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>test_dataset</span> <span class=o>=</span> <span class=n>dsets</span><span class=o>.</span><span class=n>MNIST</span><span class=p>(</span><span class=n>root</span><span class=o>=</span><span class=s1>&#39;./data&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                           <span class=n>train</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                           <span class=n>transform</span><span class=o>=</span><span class=n>transforms</span><span class=o>.</span><span class=n>ToTensor</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>train_loader</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>utils</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>DataLoader</span><span class=p>(</span><span class=n>dataset</span><span class=o>=</span><span class=n>train_dataset</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                           <span class=n>batch_size</span><span class=o>=</span><span class=n>batch_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                           <span class=n>shuffle</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>test_loader</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>utils</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>DataLoader</span><span class=p>(</span><span class=n>dataset</span><span class=o>=</span><span class=n>test_dataset</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                          <span class=n>batch_size</span><span class=o>=</span><span class=n>batch_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                          <span class=n>shuffle</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>定义LSTM网络类：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>LSTMNet</span><span class=p>(</span><span class=n>nn</span><span class=o>.</span><span class=n>Module</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>input_size</span><span class=p>,</span> <span class=n>hidden_size</span><span class=p>,</span> <span class=n>num_layers</span><span class=p>,</span> <span class=n>num_classes</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>(</span><span class=n>LSTMNet</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>hidden_size</span> <span class=o>=</span> <span class=n>hidden_size</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>num_layers</span> <span class=o>=</span> <span class=n>num_layers</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>lstm</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>LSTM</span><span class=p>(</span><span class=n>input_size</span><span class=p>,</span> <span class=n>hidden_size</span><span class=p>,</span> <span class=n>num_layers</span><span class=p>,</span> <span class=n>batch_first</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>fc</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>Linear</span><span class=p>(</span><span class=n>hidden_size</span><span class=p>,</span> <span class=n>num_classes</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl><span class=c1># 初始化隐藏层状态和细胞状态</span>
+</span></span><span class=line><span class=cl>        <span class=n>h0</span> <span class=o>=</span> <span class=n>Variable</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>num_layers</span><span class=p>,</span> <span class=n>x</span><span class=o>.</span><span class=n>size</span><span class=p>(</span><span class=mi>0</span><span class=p>),</span> <span class=bp>self</span><span class=o>.</span><span class=n>hidden_size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=n>c0</span> <span class=o>=</span> <span class=n>Variable</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>num_layers</span><span class=p>,</span> <span class=n>x</span><span class=o>.</span><span class=n>size</span><span class=p>(</span><span class=mi>0</span><span class=p>),</span> <span class=bp>self</span><span class=o>.</span><span class=n>hidden_size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># LSTM的正向传递</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=p>,</span> <span class=n>_</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>lstm</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=p>(</span><span class=n>h0</span><span class=p>,</span> <span class=n>c0</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 解码最后一个时间步的隐藏状态</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>fc</span><span class=p>(</span><span class=n>out</span><span class=p>[:,</span> <span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=p>:])</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>out</span>
+</span></span></code></pre></td></tr></table></div></div><p>实例化并配置网络参数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>device</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>device</span><span class=p>(</span><span class=s2>&#34;cuda&#34;</span> <span class=k>if</span> <span class=n>torch</span><span class=o>.</span><span class=n>cuda</span><span class=o>.</span><span class=n>is_available</span><span class=p>()</span> <span class=k>else</span> <span class=s2>&#34;cpu&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>rnn</span> <span class=o>=</span> <span class=n>LSTMNet</span><span class=p>(</span><span class=n>input_size</span><span class=p>,</span> <span class=n>hidden_size</span><span class=p>,</span> <span class=n>num_layers</span><span class=p>,</span> <span class=n>num_classes</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>rnn</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 构建损失函数和优化器</span>
+</span></span><span class=line><span class=cl><span class=n>criterion</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>CrossEntropyLoss</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>optimizer</span> <span class=o>=</span> <span class=n>optim</span><span class=o>.</span><span class=n>Adam</span><span class=p>(</span><span class=n>rnn</span><span class=o>.</span><span class=n>parameters</span><span class=p>(),</span> <span class=n>lr</span><span class=o>=</span><span class=n>learning_rate</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>训练网络：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>for</span> <span class=n>epoch</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>num_epochs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=p>(</span><span class=n>images</span><span class=p>,</span> <span class=n>labels</span><span class=p>)</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>train_loader</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>images</span> <span class=o>=</span> <span class=n>Variable</span><span class=p>(</span><span class=n>images</span><span class=o>.</span><span class=n>view</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=n>sequence_length</span><span class=p>,</span> <span class=n>input_size</span><span class=p>))</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>labels</span> <span class=o>=</span> <span class=n>Variable</span><span class=p>(</span><span class=n>labels</span><span class=p>)</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 清除梯度</span>
+</span></span><span class=line><span class=cl>        <span class=n>optimizer</span><span class=o>.</span><span class=n>zero_grad</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 前向传播</span>
+</span></span><span class=line><span class=cl>        <span class=n>outputs</span> <span class=o>=</span> <span class=n>rnn</span><span class=p>(</span><span class=n>images</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 计算损失和梯度</span>
+</span></span><span class=line><span class=cl>        <span class=n>loss</span> <span class=o>=</span> <span class=n>criterion</span><span class=p>(</span><span class=n>outputs</span><span class=p>,</span> <span class=n>labels</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>loss</span><span class=o>.</span><span class=n>backward</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 优化参数</span>
+</span></span><span class=line><span class=cl>        <span class=n>optimizer</span><span class=o>.</span><span class=n>step</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 打印信息if (i+1) % 100 == 0:</span>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;Epoch [</span><span class=si>%d</span><span class=s1>/</span><span class=si>%d</span><span class=s1>], Step [</span><span class=si>%d</span><span class=s1>/</span><span class=si>%d</span><span class=s1>], Loss: </span><span class=si>%.4f</span><span class=s1>&#39;</span>
+</span></span><span class=line><span class=cl>                  <span class=o>%</span> <span class=p>(</span><span class=n>epoch</span><span class=o>+</span><span class=mi>1</span><span class=p>,</span> <span class=n>num_epochs</span><span class=p>,</span> <span class=n>i</span><span class=o>+</span><span class=mi>1</span><span class=p>,</span> <span class=nb>len</span><span class=p>(</span><span class=n>train_dataset</span><span class=p>)</span><span class=o>//</span><span class=n>batch_size</span><span class=p>,</span> <span class=n>loss</span><span class=o>.</span><span class=n>item</span><span class=p>()))</span>
+</span></span></code></pre></td></tr></table></div></div><p>测试训练好的模型：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>correct</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=n>total</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>images</span><span class=p>,</span> <span class=n>labels</span> <span class=ow>in</span> <span class=n>test_loader</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>images</span> <span class=o>=</span> <span class=n>Variable</span><span class=p>(</span><span class=n>images</span><span class=o>.</span><span class=n>view</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=n>sequence_length</span><span class=p>,</span> <span class=n>input_size</span><span class=p>))</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>labels</span> <span class=o>=</span> <span class=n>labels</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>outputs</span> <span class=o>=</span> <span class=n>rnn</span><span class=p>(</span><span class=n>images</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>_</span><span class=p>,</span> <span class=n>predicted</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>max</span><span class=p>(</span><span class=n>outputs</span><span class=o>.</span><span class=n>data</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>total</span> <span class=o>+=</span> <span class=n>labels</span><span class=o>.</span><span class=n>size</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>correct</span> <span class=o>+=</span> <span class=p>(</span><span class=n>predicted</span> <span class=o>==</span> <span class=n>labels</span><span class=p>)</span><span class=o>.</span><span class=n>sum</span><span class=p>()</span><span class=o>.</span><span class=n>item</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s1>&#39;Test Accuracy: </span><span class=si>%.2f%%</span><span class=s1>&#39;</span> <span class=o>%</span> <span class=p>(</span><span class=mi>100</span> <span class=o>*</span> <span class=n>correct</span> <span class=o>/</span> <span class=n>total</span><span class=p>))</span>
+</span></span></code></pre></td></tr></table></div></div></article><hr><div class=page-end id=footer><div class=backlinks-container><h3>Backlinks</h3><ul class=backlinks><li>No backlinks found</li></ul></div><div><script src=https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI=" crossorigin=anonymous></script><h3>Interactive Graph</h3><div id=graph-container></div><style>:root{--g-node:var(--secondary);--g-node-active:var(--primary);--g-node-inactive:var(--visited);--g-link:var(--outlinegray);--g-link-active:#5a7282}</style><script src=https://www.knowlnk.tech/js/graph.6579af7b10c818dbd2ca038702db0224.js></script></div></div><div id=contact_buttons><footer><p>Made by Wu Chenyue using <a href=https://github.com/jackyzha0/quartz>Quartz</a>, © 2023</p><ul><li><a href=https://www.knowlnk.tech/>Home</a></li><li><a href=https://github.com/rootyue>GitHub</a></li></ul></footer></div></div></body></html>
